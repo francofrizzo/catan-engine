@@ -1,0 +1,26 @@
+{
+  "name": "catan",
+  "version": "1.0.0",
+  "description": "A Typescript implementation of Catan",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsc-watch --onSuccess \"npm start\"",
+    "start": "node ./dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "catan",
+    "game",
+    "table",
+    "game",
+    "conquerors",
+    "strategy"
+  ],
+  "author": "Franco Frizzo",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "tsc-watch": "^4.6.0",
+    "typescript": "^4.5.5"
+  }
+}
