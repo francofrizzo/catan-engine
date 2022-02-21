@@ -1,6 +1,7 @@
 import DevelopmentCard from "./DevelopmentCard";
 import GameplayError from "../Dynamics/GameplayError";
 import Resource from "../Resources/Resource";
+import { Checker, CheckResult } from "../Checks/Checks";
 
 export class MonopolyCard extends DevelopmentCard {
   private resource: Resource | null = null;
@@ -13,26 +14,24 @@ export class MonopolyCard extends DevelopmentCard {
     this.resource = resource;
   }
 
+  public canBePlayed(): CheckResult {
+    return new Checker()
+      .addChecks([super.canBePlayed(), { check: this.resource !== null, elseReason: "UNDEFINED_MONOPOLY_RESOURCE" }])
+      .run();
+  }
+
   public play(): void {
-    if (this.holder !== null) {
-      if (this.resource !== null) {
-        this.game
-          .getPlayers()
-          .filter((player) => !player.is(this.holder!))
-          .forEach((player) => {
-            const stolenResources = player.stealAll(this.resource!);
-            this.holder!.recieve(stolenResources);
-          });
-        super.play();
-      } else {
-        throw new GameplayError(
-          "It's necessary to define which resource to get before playing this card"
-        );
-      }
+    if (this.holder !== null && this.resource !== null) {
+      this.game
+        .getPlayers()
+        .filter((player) => !player.is(this.holder!))
+        .forEach((player) => {
+          const stolenResources = player.giveAwayAll(this.resource!);
+          this.holder!.recieve(stolenResources);
+        });
+      super.play();
     } else {
-      throw new GameplayError(
-        "A player must hold the card before it can be played"
-      );
+      throw Error("Some arguments for playing this card are undefined");
     }
   }
 }

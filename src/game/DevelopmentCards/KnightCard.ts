@@ -1,39 +1,41 @@
 import DevelopmentCard from "./DevelopmentCard";
 import GameplayError from "../Dynamics/GameplayError";
 import Player from "../Dynamics/Player";
+import { Checker, CheckResult } from "../Checks/Checks";
+import Tile from "../Board/Tile";
 
 export class KnightCard extends DevelopmentCard {
-  private destinyTileId: number | null = null;
+  private destinyTile: Tile | null = null;
   private stealFrom: Player | null = null;
 
   public victoryPoints(): number {
     return 0;
   }
 
-  public setDestinyTileId(tileId: number) {
-    this.destinyTileId = tileId;
+  public setDestinyTileId(tile: Tile) {
+    this.destinyTile = tile;
   }
 
   public setStealFrom(stealFrom: Player | null) {
     this.stealFrom = stealFrom;
   }
 
+  public canBePlayed(): CheckResult {
+    return new Checker()
+      .addChecks([
+        super.canBePlayed(),
+        { check: this.destinyTile !== null, elseReason: "UNDEFINED_DESTINY_TILE" },
+        this.game.getBoard().canMoveThief(this.holder!, this.destinyTile!, this.stealFrom),
+      ])
+      .run();
+  }
+
   public play() {
-    if (this.holder !== null) {
-      if (this.destinyTileId === null) {
-        throw new GameplayError(
-          "It's necessary to define where to move the thief before playing this card"
-        );
-      } else {
-        this.game
-          .getBoard()
-          .moveThief(this.holder!, this.destinyTileId, this.stealFrom);
-        super.play();
-      }
+    if (this.holder !== null && this.destinyTile !== null) {
+      this.game.getBoard().moveThief(this.holder!, this.destinyTile, this.stealFrom);
+      super.play();
     } else {
-      throw new GameplayError(
-        "A player must hold the card before it can be played"
-      );
+      throw Error("Some arguments for playing this card are undefined");
     }
   }
 

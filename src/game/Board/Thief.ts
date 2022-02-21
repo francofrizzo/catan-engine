@@ -1,62 +1,60 @@
 import Tile from "./Tile";
 import GameplayError from "../Dynamics/GameplayError";
 import Player from "../Dynamics/Player";
+import { Checker, CheckResult } from "../Checks/Checks";
 
 export class Thief {
   private position: Tile | null = null;
 
   public moveTo(player: Player, tile: Tile, stealFrom: Player | null) {
     this.changePositionTo(tile);
-    this.steal(player, stealFrom);
+    if (stealFrom !== null) {
+      this.steal(player, stealFrom);
+    }
+  }
+
+  public canChangePositionTo(tile: Tile): CheckResult {
+    return new Checker()
+      .addCheck({
+        check: !this.position || !this.position.is(tile),
+        elseReason: "THIEF_IS_ALREADY_IN_TILE",
+      })
+      .run();
+  }
+
+  public canStealFrom(player: Player, tile: Tile, stealFrom: Player | null): CheckResult {
+    const stealablePlayers = tile
+      .getAdjacentConstructions()
+      .map((construction) => construction.getPlayer())
+      .filter((player) => !player.is(player) && player.getResourcesCount() > 0);
+    return new Checker()
+      .addChecks([
+        {
+          check: stealFrom === null || !player.is(stealFrom),
+          elseReason: "PLAYER_CANT_STEAL_FROM_THEMSELVES",
+        },
+        {
+          check: stealFrom === null || stealablePlayers.some((player) => player.is(stealFrom)),
+          elseReason: "CANNOT_STEAL_FROM_THAT_PLAYER",
+        },
+        {
+          check: stealablePlayers.length === 0 || stealFrom !== null,
+          elseReason: "MUST_STEAL_FROM_SOME_PLAYER",
+        },
+      ])
+      .run();
   }
 
   public changePositionTo(tile: Tile) {
     if (this.position) {
-      if (this.position.is(tile)) {
-        throw new GameplayError(
-          "The thief can't be moved to the same tile it is already in"
-        );
-      }
       this.position.removeThief();
     }
     tile.addThief(this);
     this.position = tile;
   }
 
-  public steal(player: Player, stealFrom: Player | null) {
-    if (this.position) {
-      const playersToStealFrom = Array.from(
-        new Set(
-          this.position
-            .getAdjacentConstructions()
-            .map((construction) => construction.getPlayer())
-        )
-      );
-
-      if (stealFrom !== null) {
-        if (stealFrom.is(player)) {
-          throw new GameplayError(
-            `It's not possible for ${player.getName()} to steal a resource from themselves`
-          );
-        }
-        if (
-          playersToStealFrom.every((otherPlayer) => !otherPlayer.is(stealFrom))
-        ) {
-          throw new GameplayError(
-            `It's not possible for ${player.getName()} to steal a resource from ${stealFrom.getName()}`
-          );
-        }
-        player.recieve(stealFrom.stealRandomResource());
-      } else {
-        if (playersToStealFrom.length > 0) {
-          throw new GameplayError(
-            `It is necessary to steal a resource from some player`
-          );
-        }
-      }
-    } else {
-      throw Error("The thief is not positioned on the board");
-    }
+  public steal(player: Player, stealFrom: Player) {
+    player.recieve(stealFrom.giveAwayRandomResource());
   }
 }
 

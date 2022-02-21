@@ -2,11 +2,12 @@ import BoardBuilder from "./BoardBuilder";
 import Corner from "./Corner";
 import Thief from "./Thief";
 import Tile, { DesertTile } from "./Tile";
+import { CheckResult } from "../Checks/Checks";
 import Road from "../Constructions/Road";
 import Settlement from "../Constructions/Settlement";
-import CheckResult from "../Dynamics/CheckResult";
 import GameplayError from "../Dynamics/GameplayError";
 import Player from "../Dynamics/Player";
+import { Checker } from "../Checks/Checks";
 
 export class Board {
   private tiles: Tile[] = [];
@@ -32,15 +33,21 @@ export class Board {
     this.thief = thief;
   }
 
-  public moveThief(player: Player, tileId: number, stealFrom: Player | null) {
-    this.thief.moveTo(player, this.getTile(tileId), stealFrom);
+  public canMoveThief(player: Player, tile: Tile, stealFrom: Player | null): CheckResult {
+    return new Checker()
+      .addChecks([this.thief.canChangePositionTo(tile), this.thief.canStealFrom(player, tile, stealFrom)])
+      .run();
+  }
+
+  public moveThief(player: Player, tile: Tile, stealFrom: Player | null) {
+    this.thief.moveTo(player, tile, stealFrom);
   }
 
   public getTile(tileId: number): Tile {
     if (tileId < this.tiles.length) {
       return this.tiles[tileId];
     } else {
-      throw new GameplayError(`There is no tile with id ${tileId}`);
+      throw new Error(`There is no tile with id ${tileId}`);
     }
   }
 
@@ -57,88 +64,61 @@ export class Board {
     if (cornerId < this.corners.length) {
       return this.corners[cornerId];
     } else {
-      throw new GameplayError(`There is no corner with id ${cornerId}`);
+      throw new Error(`There is no corner with id ${cornerId}`);
     }
   }
 
-  public buildSettlement(
-    player: Player,
-    cornerId: number,
-    requireConnection = true
-  ): Settlement {
-    const corner = this.getCorner(cornerId);
-    if (requireConnection && !corner.isConnectedToPlayer(player)) {
-      throw new GameplayError(
-        `Can't build Settlement: corner ${cornerId} is not connected to ${player.getName()}`
-      );
-    } else {
-      const check = corner.canAcceptSettlement();
-      if (check.allowed) {
-        return corner.addSettlement(player);
-      } else {
-        throw new GameplayError("Can't build Settlement: " + check.reason);
-      }
-    }
+  public canBuildRoad(player: Player, [corner1, corner2]: [Corner, Corner]): CheckResult {
+    return new Checker()
+      .addChecks([
+        {
+          check: corner1.isAdjacentTo(corner2),
+          elseReason: "CORNERS_NOT_ADJACENT",
+        },
+        {
+          check: !corner1.hasRoadTo(corner2),
+          elseReason: "EDGE_OCCUPIED",
+        },
+        {
+          check: corner1.isConnectedToPlayer(player) || corner2.isConnectedToPlayer(player),
+          elseReason: "DISCONNECTED_EDGE",
+        },
+        corner1.canAcceptRoad(player),
+        corner2.canAcceptRoad(player),
+      ])
+      .run();
   }
 
-  public canBuildRoad(
-    player: Player,
-    [corner1Id, corner2Id]: [number, number]
-  ): CheckResult {
-    const corner1 = this.getCorner(corner1Id);
-    const corner2 = this.getCorner(corner2Id);
-
-    if (
-      !corner1.isConnectedToPlayer(player) &&
-      !corner2.isConnectedToPlayer(player)
-    ) {
-      return {
-        allowed: false,
-        reason: `Neither corner ${corner1Id} nor ${corner2Id} are connected to ${player.getName()}`,
-      };
-    } else {
-      const check1 = corner1.canAcceptRoad(player, corner2);
-      if (!check1.allowed) {
-        return { allowed: false, reason: check1.reason };
-      } else {
-        const check2 = corner2.canAcceptRoad(player, corner1);
-        if (!check2.allowed) {
-          return {
-            allowed: false,
-            reason: check2.reason,
-          };
-        }
-      }
+  public canBuildSettlement(player: Player, corner: Corner, requireConnection: boolean): CheckResult {
+    const checker = new Checker();
+    if (requireConnection) {
+      checker.addCheck({
+        check: corner.isConnectedToPlayer(player),
+        elseReason: "DISCONNECTED_CORNER",
+      });
     }
-    return { allowed: true };
+    checker.addCheck(corner.canAcceptSettlement());
+    return checker.run();
   }
 
-  public buildRoad(
-    player: Player,
-    [corner1Id, corner2Id]: [number, number]
-  ): Road {
-    const checkResult = this.canBuildRoad(player, [corner1Id, corner2Id]);
-    if (checkResult.allowed) {
-      const corner1 = this.getCorner(corner1Id);
-      const corner2 = this.getCorner(corner2Id);
-      const road = new Road(player, [corner1, corner2]);
-      corner1.addRoad(road);
-      corner2.addRoad(road);
-      this.roads.push(road);
-      return road;
-    } else {
-      throw new GameplayError("Can't build Road: " + checkResult.reason);
-    }
+  public canBuildCity(player: Player, corner: Corner): CheckResult {
+    return corner.canAcceptCity(player);
   }
 
-  public buildCity(player: Player, cornerId: number): Settlement {
-    const corner = this.getCorner(cornerId);
-    const check = corner.canAcceptCity(player);
-    if (check.allowed) {
-      return corner.addCity(player);
-    } else {
-      throw new GameplayError("Can't build City: " + check.reason);
-    }
+  public buildRoad(player: Player, [corner1, corner2]: [Corner, Corner]): Road {
+    const road = new Road(player, [corner1, corner2]);
+    corner1.addRoad(road);
+    corner2.addRoad(road);
+    this.roads.push(road);
+    return road;
+  }
+
+  public buildSettlement(player: Player, corner: Corner): Settlement {
+    return corner.addSettlement(player);
+  }
+
+  public buildCity(player: Player, corner: Corner): Settlement {
+    return corner.addCity(player);
   }
 
   //   public print() {

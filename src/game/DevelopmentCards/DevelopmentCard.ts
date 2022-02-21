@@ -3,13 +3,15 @@ import Game from "../Dynamics/Game";
 import Player from "../Dynamics/Player";
 import Resource from "../Resources/Resource";
 import ResourceBundle from "../Resources/ResourceBundle";
+import Turn from "../Turns/Turn";
+import { Checker, CheckResult } from "../Checks/Checks";
 
 let cardIds = 0;
 
 export abstract class DevelopmentCard {
   protected holder: Player | null = null;
+  protected turnDrawn: Turn | null = null;
   protected id: number = cardIds++;
-  protected playable: boolean = false;
   protected played: boolean = false;
 
   constructor(protected game: Game) {}
@@ -28,24 +30,36 @@ export abstract class DevelopmentCard {
     }
   }
 
-  public giveTo(player: Player) {
+  public giveTo(player: Player, turn: Turn) {
     this.holder = player;
+    this.turnDrawn = turn;
   }
 
   public getHolder(): Player | null {
     return this.holder;
   }
 
-  public markAsPlayable(): void {
-    this.playable = true;
+  public canBePlayed(): CheckResult {
+    return new Checker()
+      .addChecks([
+        {
+          check: !this.played,
+          elseReason: "CARD_ALREADY_PLAYED",
+        },
+        {
+          check: this.holder !== null,
+          elseReason: "CARD_HAS_NO_HOLDER",
+        },
+        {
+          check: this.turnDrawn !== null && this.turnDrawn.hasFinished(),
+          elseReason: "CARD_DRAWN_IN_THIS_TURN",
+        },
+      ])
+      .run();
   }
 
   public play(): void {
     this.played = true;
-  }
-
-  public isPlayable(): boolean {
-    return this.playable;
   }
 
   public wasPlayed(): boolean {

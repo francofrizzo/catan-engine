@@ -1,40 +1,36 @@
 import DevelopmentCard from "./DevelopmentCard";
-import GameplayError from "../Dynamics/GameplayError";
+import Corner from "../Board/Corner";
+import { Checker, CheckResult } from "../Checks/Checks";
 
 export class RoadBuildingCard extends DevelopmentCard {
-  private corners: null | [[number, number], [number, number]] = null;
+  private corners: null | [[Corner, Corner], [Corner, Corner]] = null;
 
   public victoryPoints(): number {
     return 0;
   }
 
-  public setCorners(corners: [[number, number], [number, number]]) {
+  public setCorners(corners: [[Corner, Corner], [Corner, Corner]]) {
     this.corners = corners;
   }
 
+  public canBePlayed(): CheckResult {
+    return new Checker()
+      .addChecks([
+        super.canBePlayed(),
+        { check: this.corners !== null, elseReason: "UNDEFINED_ROAD_BUILDING_CORNERS" },
+        this.holder!.canBuildRoad(this.corners![0], true),
+        this.holder!.canBuildRoad(this.corners![1], true),
+      ])
+      .run();
+  }
+
   public play(): void {
-    if (this.holder !== null) {
-      if (this.corners !== null) {
-        const check1 = this.holder.canBuildRoad(this.corners[0]);
-        const check2 = this.holder.canBuildRoad(this.corners[1]);
-        if (!check1.allowed) {
-          throw new GameplayError("Can't build Road: " + check1.reason);
-        } else if (!check2.allowed) {
-          throw new GameplayError("Can't build Road: " + check2.reason);
-        } else {
-          this.holder.buildRoad(this.corners[0], true);
-          this.holder.buildRoad(this.corners[1], true);
-          super.play();
-        }
-      } else {
-        throw new GameplayError(
-          "It's necessary to define which Roads to build before playing this card"
-        );
-      }
+    if (this.holder !== null && this.corners !== null) {
+      this.holder.buildRoad(this.corners[0], true);
+      this.holder.buildRoad(this.corners[1], true);
+      super.play();
     } else {
-      throw new GameplayError(
-        "A player must hold the card before it can be played"
-      );
+      throw Error("Some arguments for playing this card are undefined");
     }
   }
 }

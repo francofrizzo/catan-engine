@@ -9,42 +9,61 @@ import DevelopmentCard from "../DevelopmentCards/DevelopmentCard";
 import Turn from "../Turns/Turn";
 import InitialPhaseTurn from "../Turns/InitialPhaseTurn";
 import NormalTurn from "../Turns/NormalTurn";
+import { Checker, CheckResult } from "../Checks/Checks";
+
+export interface GameOptions {
+  autoCollect: boolean;
+}
 
 export class Game {
   private board: Board;
   private players: Player[];
   private developmentCardDeck: DevelopmentCard[] = getDevelopmentCardDeck(this);
-  private achievementTokens: AchievementToken[] = [
-    new LongestRouteToken(),
-    new LargestArmyToken(),
-  ];
-  private winner: Player | null = null;
+  private achievementTokens: AchievementToken[] = [new LongestRouteToken(), new LargestArmyToken()];
 
   private currentTurn: Turn;
+  private winner: Player | null = null;
 
-  constructor() {
+  constructor(private options: GameOptions) {
     this.board = new Board();
-    this.players = Array.from(
-      { length: 4 },
-      (_, index) => new Player(this, index, `Player ${index}`)
-    );
-    this.currentTurn = this.getFirstTurn();
+    this.players = Array.from({ length: 4 }, (_, index) => new Player(this, index, `Player ${index}`));
+    this.currentTurn = this.buildFirstTurn();
   }
 
-  private getFirstTurn(): Turn {
+  // Options
+
+  public getOptions(): GameOptions {
+    return this.options;
+  }
+
+  // Board
+
+  public getBoard(): Board {
+    return this.board;
+  }
+
+  // Turns
+
+  public getCurrentTurn(): Turn {
+    return this.currentTurn;
+  }
+
+  public advanceTurn(): void {
+    if (this.winner === null) {
+      this.currentTurn = this.buildNextTurn(this.currentTurn);
+    }
+  }
+
+  private buildFirstTurn(): Turn {
     return new InitialPhaseTurn(this, this.getFirstPlayer(), 1);
   }
 
-  private getNextTurn(turn: Turn): Turn {
+  private buildNextTurn(turn: Turn): Turn {
     const playerId = turn.getPlayer().getId();
     if (turn instanceof InitialPhaseTurn) {
       if (turn.getStage() === 1) {
         if (!this.isSecondPlayer(playerId)) {
-          return new InitialPhaseTurn(
-            this,
-            this.getPreviousPlayer(playerId),
-            1
-          );
+          return new InitialPhaseTurn(this, this.getPreviousPlayer(playerId), 1);
         } else {
           return new InitialPhaseTurn(this, this.getSecondPlayer(), 2);
         }
@@ -59,23 +78,11 @@ export class Game {
     return new NormalTurn(this, this.getNextPlayer(playerId));
   }
 
-  public advanceTurn(): void {
-    if (this.winner === null) {
-      this.currentTurn = this.getNextTurn(this.currentTurn);
-    }
-  }
-
   public win(player: Player): void {
     this.winner = player;
   }
 
-  public getBoard(): Board {
-    return this.board;
-  }
-
-  public getCurrentTurn(): Turn {
-    return this.currentTurn;
-  }
+  // Players
 
   public getPlayers(): Player[] {
     return this.players;
@@ -86,15 +93,11 @@ export class Game {
   }
 
   public getNextPlayer(id: number): Player {
-    return id < this.players.length - 1
-      ? this.players[id + 1]
-      : this.players[0];
+    return id < this.players.length - 1 ? this.players[id + 1] : this.players[0];
   }
 
   public getPreviousPlayer(id: number): Player {
-    return id > 0
-      ? this.players[id - 1]
-      : this.players[this.players.length - 1];
+    return id > 0 ? this.players[id - 1] : this.players[this.players.length - 1];
   }
 
   public getFirstPlayer(): Player {
@@ -113,6 +116,8 @@ export class Game {
     return id === 1;
   }
 
+  // Actions
+
   public awardTokens(player: Player): void {
     this.achievementTokens.forEach((token) => {
       if (token.canBeAwardedTo(player)) {
@@ -121,13 +126,20 @@ export class Game {
     });
   }
 
+  public canDrawDevelopmentCard(): CheckResult {
+    return new Checker()
+      .addCheck({
+        check: this.developmentCardDeck.length > 0,
+        elseReason: "EMPTY_DECK",
+      })
+      .run();
+  }
+
   public drawDevelopmentCard(): DevelopmentCard {
     if (this.developmentCardDeck.length > 0) {
       return this.developmentCardDeck.pop()!;
     } else {
-      throw new GameplayError(
-        "There are no more development cards in the deck"
-      );
+      throw new Error("There are no more development cards in the deck");
     }
   }
 }

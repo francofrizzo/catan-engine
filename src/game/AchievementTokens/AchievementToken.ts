@@ -1,4 +1,3 @@
-import GameplayError from "../Dynamics/GameplayError";
 import Player from "../Dynamics/Player";
 
 let tokenIds = 0;
@@ -29,9 +28,7 @@ export abstract class AchievementToken {
       player.addAchievementToken(this);
       this.holder = player;
     } else {
-      throw new GameplayError(
-        `${player.getName()} cannot be awarded the ${this}`
-      );
+      throw new Error(`${player.getName()} cannot be awarded the ${this}`);
     }
   }
 
