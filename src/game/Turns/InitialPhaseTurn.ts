@@ -33,11 +33,11 @@ export class InitialPhaseTurn extends Turn {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
-      { check: this.roadBuilt === null, elseReason: "ROAD_ALREADY_BUILT" },
-      { check: this.settlementBuilt !== null, elseReason: "SETTLEMENT_NOT_BUILT" },
-      player.canBuildRoad([corner1, corner2], true),
+      { check: () => this.roadBuilt === null, elseReason: "ROAD_ALREADY_BUILT" },
+      { check: () => this.settlementBuilt !== null, elseReason: "SETTLEMENT_NOT_BUILT" },
+      () => player.canBuildRoad([corner1, corner2], true),
       {
-        check: this.settlementBuilt!.getCorner().is(corner1) || this.settlementBuilt!.getCorner().is(corner2),
+        check: () => this.settlementBuilt!.getCorner().is(corner1) || this.settlementBuilt!.getCorner().is(corner2),
         elseReason: "ROAD_AND_SETTLEMENT_NOT_ADJACENT",
       },
     ]);
@@ -56,8 +56,8 @@ export class InitialPhaseTurn extends Turn {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
-      { check: this.settlementBuilt === null, elseReason: "SETTLEMENT_ALREADY_BUILT" },
-      player.canBuildSettlement(corner, true, false),
+      { check: () => this.settlementBuilt === null, elseReason: "SETTLEMENT_ALREADY_BUILT" },
+      () => player.canBuildSettlement(corner, true, false),
     ]);
   }
 
@@ -136,8 +136,8 @@ export class InitialPhaseTurn extends Turn {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
-      { check: this.settlementBuilt !== null, elseReason: "SETTLEMENT_NOT_BUILT" },
-      { check: this.roadBuilt !== null, elseReason: "ROAD_NOT_BUILT" },
+      { check: () => this.settlementBuilt !== null, elseReason: "SETTLEMENT_NOT_BUILT" },
+      { check: () => this.roadBuilt !== null, elseReason: "ROAD_NOT_BUILT" },
     ]);
   }
 
@@ -152,7 +152,7 @@ export class InitialPhaseTurn extends Turn {
   // Checks
 
   protected notAllowedInThisTurn(): CheckResult {
-    return this.check([{ check: false, elseReason: "NOT_ALLOWED_IN_THIS_TURN" }]);
+    return this.check([{ check: () => false, elseReason: "NOT_ALLOWED_IN_THIS_TURN" }]);
   }
 }
 

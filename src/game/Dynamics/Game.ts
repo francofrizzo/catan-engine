@@ -129,7 +129,7 @@ export class Game {
   public canDrawDevelopmentCard(): CheckResult {
     return new Checker()
       .addCheck({
-        check: this.developmentCardDeck.length > 0,
+        check: () => this.developmentCardDeck.length > 0,
         elseReason: "EMPTY_DECK",
       })
       .run();

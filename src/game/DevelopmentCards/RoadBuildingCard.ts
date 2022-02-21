@@ -16,10 +16,10 @@ export class RoadBuildingCard extends DevelopmentCard {
   public canBePlayed(): CheckResult {
     return new Checker()
       .addChecks([
-        super.canBePlayed(),
-        { check: this.corners !== null, elseReason: "UNDEFINED_ROAD_BUILDING_CORNERS" },
-        this.holder!.canBuildRoad(this.corners![0], true),
-        this.holder!.canBuildRoad(this.corners![1], true),
+        super.canBePlayed,
+        { check: () => this.corners !== null, elseReason: "UNDEFINED_ROAD_BUILDING_CORNERS" },
+        () => this.holder!.canBuildRoad(this.corners![0], true),
+        () => this.holder!.canBuildRoad(this.corners![1], true),
       ])
       .run();
   }

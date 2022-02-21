@@ -16,7 +16,10 @@ export class MonopolyCard extends DevelopmentCard {
 
   public canBePlayed(): CheckResult {
     return new Checker()
-      .addChecks([super.canBePlayed(), { check: this.resource !== null, elseReason: "UNDEFINED_MONOPOLY_RESOURCE" }])
+      .addChecks([
+        super.canBePlayed,
+        { check: () => this.resource !== null, elseReason: "UNDEFINED_MONOPOLY_RESOURCE" },
+      ])
       .run();
   }
 

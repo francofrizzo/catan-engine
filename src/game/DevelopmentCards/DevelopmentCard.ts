@@ -43,15 +43,15 @@ export abstract class DevelopmentCard {
     return new Checker()
       .addChecks([
         {
-          check: !this.played,
+          check: () => !this.played,
           elseReason: "CARD_ALREADY_PLAYED",
         },
         {
-          check: this.holder !== null,
+          check: () => this.holder !== null,
           elseReason: "CARD_HAS_NO_HOLDER",
         },
         {
-          check: this.turnDrawn !== null && this.turnDrawn.hasFinished(),
+          check: () => this.turnDrawn !== null && this.turnDrawn.hasFinished(),
           elseReason: "CARD_DRAWN_IN_THIS_TURN",
         },
       ])

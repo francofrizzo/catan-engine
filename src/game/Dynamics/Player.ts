@@ -55,7 +55,7 @@ export class Player {
   public canGiveAway(resources: ResourceBundle): CheckResult {
     return new Checker()
       .addCheck({
-        check: this.has(resources),
+        check: () => this.has(resources),
         elseReason: "NOT_ENOUGH_RESOURCES",
       })
       .run();
@@ -84,23 +84,23 @@ export class Player {
     return new Checker()
       .addChecks([
         {
-          check: !otherPlayer.is(this),
+          check: () => !otherPlayer.is(this),
           elseReason: "SAME_ORIGIN_AND_DESTINY_PLAYER",
         },
         {
-          check: !resourcesGiven.isEmpty(),
+          check: () => !resourcesGiven.isEmpty(),
           elseReason: "NO_RESOURCES_GIVEN",
         },
         {
-          check: !resourcesTaken.isEmpty(),
+          check: () => !resourcesTaken.isEmpty(),
           elseReason: "NO_RESOURCES_TAKEN",
         },
         {
-          check: this.has(resourcesGiven),
+          check: () => this.has(resourcesGiven),
           elseReason: "NOT_ENOUGH_RESOURCES",
         },
         {
-          check: otherPlayer.has(resourcesTaken),
+          check: () => otherPlayer.has(resourcesTaken),
           elseReason: "DESTINY_PLAYER_NOT_ENOUGH_RESOURCES",
         },
       ])
@@ -117,7 +117,7 @@ export class Player {
   public canTrade(resourceTaken: Resource, resourceGiven: Resource): CheckResult {
     return new Checker()
       .addCheck({
-        check: this.resources.has(resourceGiven, this.exchangeRate(resourceGiven)),
+        check: () => this.resources.has(resourceGiven, this.exchangeRate(resourceGiven)),
         elseReason: "NOT_ENOUGH_RESOURCES",
       })
       .run();
@@ -145,11 +145,11 @@ export class Player {
     const checker = new Checker();
     if (!forFree) {
       checker.addCheck({
-        check: this.has(Road.cost()),
+        check: () => this.has(Road.cost()),
         elseReason: "NOT_ENOUGH_RESOURCES",
       });
     }
-    return checker.addCheck(this.game.getBoard().canBuildRoad(this, corners)).run();
+    return checker.addCheck(() => this.game.getBoard().canBuildRoad(this, corners)).run();
   }
 
   public buildRoad(corners: [Corner, Corner], forFree = false): Road {
@@ -165,11 +165,11 @@ export class Player {
     const checker = new Checker();
     if (!forFree) {
       checker.addCheck({
-        check: this.has(Settlement.cost()),
+        check: () => this.has(Settlement.cost()),
         elseReason: "NOT_ENOUGH_RESOURCES",
       });
     }
-    return checker.addCheck(this.game.getBoard().canBuildSettlement(this, corner, requireConnection)).run();
+    return checker.addCheck(() => this.game.getBoard().canBuildSettlement(this, corner, requireConnection)).run();
   }
 
   public buildSettlement(corner: Corner, forFree = false): Settlement {
@@ -187,10 +187,10 @@ export class Player {
   public canBuildCity(corner: Corner): CheckResult {
     return new Checker()
       .addCheck({
-        check: this.has(City.cost()),
+        check: () => this.has(City.cost()),
         elseReason: "NOT_ENOUGH_RESOURCES",
       })
-      .addCheck(this.game.getBoard().canBuildCity(this, corner))
+      .addCheck(() => this.game.getBoard().canBuildCity(this, corner))
       .run();
   }
 
@@ -210,10 +210,10 @@ export class Player {
     return new Checker()
       .addChecks([
         {
-          check: this.has(DevelopmentCard.cost()),
+          check: () => this.has(DevelopmentCard.cost()),
           elseReason: "NOT_ENOUGH_RESOURCES",
         },
-        this.game.canDrawDevelopmentCard(),
+        () => this.game.canDrawDevelopmentCard(),
       ])
       .run();
   }
@@ -229,10 +229,10 @@ export class Player {
     return new Checker()
       .addChecks([
         {
-          check: card.getHolder()?.is(this) ?? false,
+          check: () => card.getHolder()?.is(this) ?? false,
           elseReason: "CARD_NOT_OWNED_BY_PLAYER",
         },
-        card.canBePlayed(),
+        () => card.canBePlayed(),
       ])
       .run();
   }

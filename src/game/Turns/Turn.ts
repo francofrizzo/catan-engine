@@ -82,18 +82,18 @@ export abstract class Turn {
   }
 
   // Checks
-  protected check(checks: (Check | CheckResult)[]): CheckResult {
+  protected check(checks: Check[]): CheckResult {
     return new Checker().addChecks(checks).run();
   }
   protected turnNotFinished(): Check {
     return {
-      check: !this.finished,
+      check: () => !this.finished,
       elseReason: "TURN_FINISHED",
     };
   }
   protected isCurrentPlayer(player: Player): Check {
     return {
-      check: this.player.is(player),
+      check: () => this.player.is(player),
       elseReason: "OTHER_PLAYERS_TURN",
     };
   }

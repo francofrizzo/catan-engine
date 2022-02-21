@@ -35,7 +35,7 @@ export class Board {
 
   public canMoveThief(player: Player, tile: Tile, stealFrom: Player | null): CheckResult {
     return new Checker()
-      .addChecks([this.thief.canChangePositionTo(tile), this.thief.canStealFrom(player, tile, stealFrom)])
+      .addChecks([() => this.thief.canChangePositionTo(tile), () => this.thief.canStealFrom(player, tile, stealFrom)])
       .run();
   }
 
@@ -72,19 +72,19 @@ export class Board {
     return new Checker()
       .addChecks([
         {
-          check: corner1.isAdjacentTo(corner2),
+          check: () => corner1.isAdjacentTo(corner2),
           elseReason: "CORNERS_NOT_ADJACENT",
         },
         {
-          check: !corner1.hasRoadTo(corner2),
+          check: () => !corner1.hasRoadTo(corner2),
           elseReason: "EDGE_OCCUPIED",
         },
         {
-          check: corner1.isConnectedToPlayer(player) || corner2.isConnectedToPlayer(player),
+          check: () => corner1.isConnectedToPlayer(player) || corner2.isConnectedToPlayer(player),
           elseReason: "DISCONNECTED_EDGE",
         },
-        corner1.canAcceptRoad(player),
-        corner2.canAcceptRoad(player),
+        () => corner1.canAcceptRoad(player),
+        () => corner2.canAcceptRoad(player),
       ])
       .run();
   }
@@ -93,11 +93,11 @@ export class Board {
     const checker = new Checker();
     if (requireConnection) {
       checker.addCheck({
-        check: corner.isConnectedToPlayer(player),
+        check: () => corner.isConnectedToPlayer(player),
         elseReason: "DISCONNECTED_CORNER",
       });
     }
-    checker.addCheck(corner.canAcceptSettlement());
+    checker.addCheck(() => corner.canAcceptSettlement());
     return checker.run();
   }
 

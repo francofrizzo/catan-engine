@@ -1,22 +1,22 @@
 import GameplayError from "../Dynamics/GameplayError";
 
-export type Check = { check: boolean; elseReason: string } | CheckResult;
-
+type BaseCheck = { check: () => boolean; elseReason: string };
 export type CheckResult = { value: true } | { value: false; reason: string };
-
-const isCheckResult = (check: Check): check is CheckResult => Object.hasOwnProperty.call(check, "value");
+export type Check = BaseCheck | (() => CheckResult);
+const isBaseCheck = (check: Check): check is BaseCheck => Object.hasOwnProperty.call(check, "check");
 
 export const runChecks = (checks: Check[]): CheckResult => {
   let checkResult: CheckResult = { value: true };
   for (let check of checks) {
-    if (isCheckResult(check)) {
-      if (!check.value) {
-        checkResult = check;
+    if (isBaseCheck(check)) {
+      if (!check.check()) {
+        checkResult = { value: false, reason: check.elseReason };
         break;
       }
     } else {
-      if (!check.check) {
-        checkResult = { value: false, reason: check.elseReason };
+      const thisCheckResult = check();
+      if (!thisCheckResult.value) {
+        checkResult = thisCheckResult;
         break;
       }
     }

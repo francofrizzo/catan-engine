@@ -156,7 +156,7 @@ export class Corner {
   public canAcceptRoad(player: Player): CheckResult {
     return new Checker()
       .addCheck({
-        check: !this.isOccupiedByOther(player),
+        check: () => !this.isOccupiedByOther(player),
         elseReason: "CORNER_OCCUPIED_BY_OTHER_PLAYER",
       })
       .run();
@@ -165,11 +165,11 @@ export class Corner {
   public canAcceptSettlement(): CheckResult {
     return new Checker()
       .addCheck({
-        check: !this.isOccupied(),
+        check: () => !this.isOccupied(),
         elseReason: "CORNER_OCCUPIED",
       })
       .addCheck({
-        check: this.adjacentCorners.every(({ corner }) => !corner.isOccupied()),
+        check: () => this.adjacentCorners.every(({ corner }) => !corner.isOccupied()),
         elseReason: "CORNER_ADJACENT_TO_OCCUPIED_CORNER",
       })
       .run();
@@ -178,7 +178,7 @@ export class Corner {
   public canAcceptCity(player: Player): CheckResult {
     return new Checker()
       .addCheck({
-        check: this.hasSettlementOf(player),
+        check: () => this.hasSettlementOf(player),
         elseReason: "CORNER_WITHOUT_SETTLEMENT",
       })
       .run();

@@ -18,8 +18,8 @@ export class YearOfPlentyCard extends DevelopmentCard {
   public canBePlayed(): CheckResult {
     return new Checker()
       .addChecks([
-        super.canBePlayed(),
-        { check: this.resources !== null, elseReason: "UNDEFINED_YEAR_OF_PLENTY_RESOURCES" },
+        super.canBePlayed,
+        { check: () => this.resources !== null, elseReason: "UNDEFINED_YEAR_OF_PLENTY_RESOURCES" },
       ])
       .run();
   }

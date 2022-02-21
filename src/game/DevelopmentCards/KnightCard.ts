@@ -23,9 +23,9 @@ export class KnightCard extends DevelopmentCard {
   public canBePlayed(): CheckResult {
     return new Checker()
       .addChecks([
-        super.canBePlayed(),
-        { check: this.destinyTile !== null, elseReason: "UNDEFINED_DESTINY_TILE" },
-        this.game.getBoard().canMoveThief(this.holder!, this.destinyTile!, this.stealFrom),
+        super.canBePlayed,
+        { check: () => this.destinyTile !== null, elseReason: "UNDEFINED_DESTINY_TILE" },
+        () => this.game.getBoard().canMoveThief(this.holder!, this.destinyTile!, this.stealFrom),
       ])
       .run();
   }

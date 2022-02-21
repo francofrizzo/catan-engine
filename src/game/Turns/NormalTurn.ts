@@ -29,7 +29,7 @@ export class NormalTurn extends Turn {
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       {
-        check: this.rollDice === null,
+        check: () => this.rollDice === null,
         elseReason: "DICE_ALREADY_ROLLED",
       },
     ]);
@@ -52,7 +52,7 @@ export class NormalTurn extends Turn {
   }
 
   public canBuildRoad(player: Player, [corner1, corner2]: [Corner, Corner]): CheckResult {
-    return this.check([player.canBuildRoad([corner1, corner2], false)]);
+    return this.check([() => player.canBuildRoad([corner1, corner2], false)]);
   }
 
   @check((turn: NormalTurn, player: Player, [corner1, corner2]: [Corner, Corner]) =>
@@ -67,7 +67,7 @@ export class NormalTurn extends Turn {
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       ...this.afterThiefSequence(),
-      player.canBuildSettlement(corner, false, true),
+      () => player.canBuildSettlement(corner, false, true),
     ]);
   }
 
@@ -81,7 +81,7 @@ export class NormalTurn extends Turn {
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       ...this.afterThiefSequence(),
-      player.canBuildCity(corner),
+      () => player.canBuildCity(corner),
     ]);
   }
 
@@ -95,7 +95,7 @@ export class NormalTurn extends Turn {
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       ...this.afterThiefSequence(),
-      player.canBuyDevelopmentCard(),
+      () => player.canBuyDevelopmentCard(),
     ]);
   }
 
@@ -109,7 +109,7 @@ export class NormalTurn extends Turn {
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       ...this.afterThiefSequence(),
-      player.canPlayDevelopmentCard(card),
+      () => player.canPlayDevelopmentCard(card),
     ]);
   }
 
@@ -123,7 +123,7 @@ export class NormalTurn extends Turn {
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       {
-        check: this.collectibleResources(player).hasAll(resources),
+        check: () => this.collectibleResources(player).hasAll(resources),
         elseReason: "RESOURCES_NOT_AVAILABLE",
       },
     ]);
@@ -138,8 +138,11 @@ export class NormalTurn extends Turn {
   public canDiscard(player: Player, resources: ResourceBundle): CheckResult {
     return this.check([
       this.turnNotFinished(),
-      player.canGiveAway(resources),
-      { check: this.resourcesToDiscard[player.getId()] >= resources.total(), elseReason: "RESOURCES_NOT_DISCARDABLE" },
+      () => player.canGiveAway(resources),
+      {
+        check: () => this.resourcesToDiscard[player.getId()] >= resources.total(),
+        elseReason: "RESOURCES_NOT_DISCARDABLE",
+      },
     ]);
   }
 
@@ -159,7 +162,7 @@ export class NormalTurn extends Turn {
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       ...this.afterThiefSequence(),
-      this.player.canExchange(otherPlayer, resourcesGiven, resourcesTaken),
+      () => this.player.canExchange(otherPlayer, resourcesGiven, resourcesTaken),
     ]);
   }
 
@@ -186,7 +189,7 @@ export class NormalTurn extends Turn {
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       ...this.afterThiefSequence(),
-      this.player.canTrade(resourceTaken, resourceGiven),
+      () => this.player.canTrade(resourceTaken, resourceGiven),
     ]);
   }
 
@@ -201,9 +204,9 @@ export class NormalTurn extends Turn {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
-      { check: this.diceRoll === 7, elseReason: "DICE_ROLL_IS_NOT_7" },
-      { check: this.thiefMovedTo === null, elseReason: "THIEF_ALREADY_MOVED" },
-      this.game.getBoard().canMoveThief(player, tile, stealFrom),
+      { check: () => this.diceRoll === 7, elseReason: "DICE_ROLL_IS_NOT_7" },
+      { check: () => this.thiefMovedTo === null, elseReason: "THIEF_ALREADY_MOVED" },
+      () => this.game.getBoard().canMoveThief(player, tile, stealFrom),
     ]);
   }
 
@@ -246,21 +249,21 @@ export class NormalTurn extends Turn {
   // Checks
   protected diceRolled(): Check {
     return {
-      check: this.diceRoll === null,
+      check: () => this.diceRoll === null,
       elseReason: "DICE_NOT_ROLLED",
     };
   }
 
   protected allResourcesDiscarded(): Check {
     return {
-      check: Object.values(this.resourcesToDiscard).every((n) => n === 0),
+      check: () => Object.values(this.resourcesToDiscard).every((n) => n === 0),
       elseReason: "RESOURCES_NOT_DISCARDED",
     };
   }
 
   protected thiefMovedIfNeccessary(): Check {
     return {
-      check: this.diceRoll !== 7 || this.thiefMovedTo !== null,
+      check: () => this.diceRoll !== 7 || this.thiefMovedTo !== null,
       elseReason: "THIEF_NOT_MOVED",
     };
   }

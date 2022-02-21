@@ -16,7 +16,7 @@ export class Thief {
   public canChangePositionTo(tile: Tile): CheckResult {
     return new Checker()
       .addCheck({
-        check: !this.position || !this.position.is(tile),
+        check: () => !this.position || !this.position.is(tile),
         elseReason: "THIEF_IS_ALREADY_IN_TILE",
       })
       .run();
@@ -30,15 +30,15 @@ export class Thief {
     return new Checker()
       .addChecks([
         {
-          check: stealFrom === null || !player.is(stealFrom),
+          check: () => stealFrom === null || !player.is(stealFrom),
           elseReason: "PLAYER_CANT_STEAL_FROM_THEMSELVES",
         },
         {
-          check: stealFrom === null || stealablePlayers.some((player) => player.is(stealFrom)),
+          check: () => stealFrom === null || stealablePlayers.some((player) => player.is(stealFrom)),
           elseReason: "CANNOT_STEAL_FROM_THAT_PLAYER",
         },
         {
-          check: stealablePlayers.length === 0 || stealFrom !== null,
+          check: () => stealablePlayers.length === 0 || stealFrom !== null,
           elseReason: "MUST_STEAL_FROM_SOME_PLAYER",
         },
       ])
