@@ -1,5 +1,6 @@
 import Turn from "./Turn";
 import { Check, CheckResult, check } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 import City from "../Constructions/City";
 import Road from "../Constructions/Road";
 import Settlement from "../Constructions/Settlement";
@@ -30,7 +31,7 @@ export class NormalTurn extends Turn {
       this.isCurrentPlayer(player),
       {
         check: () => this.rollDice === null,
-        elseReason: "DICE_ALREADY_ROLLED",
+        elseReason: CheckFailedReason.DiceAlreadyRolled,
       },
     ]);
   }
@@ -124,7 +125,7 @@ export class NormalTurn extends Turn {
       this.isCurrentPlayer(player),
       {
         check: () => this.collectibleResources(player).hasAll(resources),
-        elseReason: "RESOURCES_NOT_AVAILABLE",
+        elseReason: CheckFailedReason.ResourcesNotAvailable,
       },
     ]);
   }
@@ -141,7 +142,7 @@ export class NormalTurn extends Turn {
       () => player.canGiveAway(resources),
       {
         check: () => this.resourcesToDiscard[player.getId()] >= resources.total(),
-        elseReason: "RESOURCES_NOT_DISCARDABLE",
+        elseReason: CheckFailedReason.ResourcesNotDiscardable,
       },
     ]);
   }
@@ -204,8 +205,8 @@ export class NormalTurn extends Turn {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
-      { check: () => this.diceRoll === 7, elseReason: "DICE_ROLL_IS_NOT_7" },
-      { check: () => this.thiefMovedTo === null, elseReason: "THIEF_ALREADY_MOVED" },
+      { check: () => this.diceRoll === 7, elseReason: CheckFailedReason.DiceRollIsNot7 },
+      { check: () => this.thiefMovedTo === null, elseReason: CheckFailedReason.ThiefAlreadyMoved },
       () => this.game.getBoard().canMoveThief(player, tile, stealFrom),
     ]);
   }
@@ -250,21 +251,21 @@ export class NormalTurn extends Turn {
   protected diceRolled(): Check {
     return {
       check: () => this.diceRoll === null,
-      elseReason: "DICE_NOT_ROLLED",
+      elseReason: CheckFailedReason.DiceNotRolled,
     };
   }
 
   protected allResourcesDiscarded(): Check {
     return {
       check: () => Object.values(this.resourcesToDiscard).every((n) => n === 0),
-      elseReason: "RESOURCES_NOT_DISCARDED",
+      elseReason: CheckFailedReason.ResourcesNotDiscarded,
     };
   }
 
   protected thiefMovedIfNeccessary(): Check {
     return {
       check: () => this.diceRoll !== 7 || this.thiefMovedTo !== null,
-      elseReason: "THIEF_NOT_MOVED",
+      elseReason: CheckFailedReason.ThiefNotMoved,
     };
   }
 

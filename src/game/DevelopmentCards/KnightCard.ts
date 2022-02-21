@@ -1,7 +1,8 @@
 import DevelopmentCard from "./DevelopmentCard";
-import GameplayError from "../Dynamics/GameplayError";
 import Player from "../Dynamics/Player";
-import { Checker, CheckResult } from "../Checks/Checks";
+import Checker from "../Checks/Checker";
+import { CheckResult } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 import Tile from "../Board/Tile";
 
 export class KnightCard extends DevelopmentCard {
@@ -24,7 +25,7 @@ export class KnightCard extends DevelopmentCard {
     return new Checker()
       .addChecks([
         super.canBePlayed,
-        { check: () => this.destinyTile !== null, elseReason: "UNDEFINED_DESTINY_TILE" },
+        { check: () => this.destinyTile !== null, elseReason: CheckFailedReason.UndefinedDestinyTile },
         () => this.game.getBoard().canMoveThief(this.holder!, this.destinyTile!, this.stealFrom),
       ])
       .run();

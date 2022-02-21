@@ -1,8 +1,9 @@
 import DevelopmentCard from "./DevelopmentCard";
-import GameplayError from "../Dynamics/GameplayError";
 import Resource from "../Resources/Resource";
 import ResourceBundle from "../Resources/ResourceBundle";
-import { Checker, CheckResult } from "../Checks/Checks";
+import { CheckResult } from "../Checks/Checks";
+import Checker from "../Checks/Checker";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 
 export class YearOfPlentyCard extends DevelopmentCard {
   private resources: [Resource, Resource] | null = null;
@@ -19,7 +20,7 @@ export class YearOfPlentyCard extends DevelopmentCard {
     return new Checker()
       .addChecks([
         super.canBePlayed,
-        { check: () => this.resources !== null, elseReason: "UNDEFINED_YEAR_OF_PLENTY_RESOURCES" },
+        { check: () => this.resources !== null, elseReason: CheckFailedReason.UndefinedYearOfPlentyResources },
       ])
       .run();
   }

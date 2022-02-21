@@ -1,7 +1,8 @@
 import DevelopmentCard from "./DevelopmentCard";
-import GameplayError from "../Dynamics/GameplayError";
+import Checker from "../Checks/Checker";
+import { CheckResult } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 import Resource from "../Resources/Resource";
-import { Checker, CheckResult } from "../Checks/Checks";
 
 export class MonopolyCard extends DevelopmentCard {
   private resource: Resource | null = null;
@@ -18,7 +19,7 @@ export class MonopolyCard extends DevelopmentCard {
     return new Checker()
       .addChecks([
         super.canBePlayed,
-        { check: () => this.resource !== null, elseReason: "UNDEFINED_MONOPOLY_RESOURCE" },
+        { check: () => this.resource !== null, elseReason: CheckFailedReason.UndefinedMonopolyResource },
       ])
       .run();
   }

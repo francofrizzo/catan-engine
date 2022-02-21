@@ -1,6 +1,8 @@
 import DevelopmentCard from "./DevelopmentCard";
 import Corner from "../Board/Corner";
-import { Checker, CheckResult } from "../Checks/Checks";
+import Checker from "../Checks/Checker";
+import { CheckResult } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 
 export class RoadBuildingCard extends DevelopmentCard {
   private corners: null | [[Corner, Corner], [Corner, Corner]] = null;
@@ -17,7 +19,7 @@ export class RoadBuildingCard extends DevelopmentCard {
     return new Checker()
       .addChecks([
         super.canBePlayed,
-        { check: () => this.corners !== null, elseReason: "UNDEFINED_ROAD_BUILDING_CORNERS" },
+        { check: () => this.corners !== null, elseReason: CheckFailedReason.UndefinedRoadBuildingCorners },
         () => this.holder!.canBuildRoad(this.corners![0], true),
         () => this.holder!.canBuildRoad(this.corners![1], true),
       ])

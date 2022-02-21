@@ -1,6 +1,8 @@
 import Board from "./Board";
 import Tile from "./Tile";
-import { Checker, CheckResult } from "../Checks/Checks";
+import Checker from "../Checks/Checker";
+import { CheckResult } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 import City from "../Constructions/City";
 import Construction from "../Constructions/Construction";
 import Road from "../Constructions/Road";
@@ -157,7 +159,7 @@ export class Corner {
     return new Checker()
       .addCheck({
         check: () => !this.isOccupiedByOther(player),
-        elseReason: "CORNER_OCCUPIED_BY_OTHER_PLAYER",
+        elseReason: CheckFailedReason.CornerOccupiedByOtherPlayer,
       })
       .run();
   }
@@ -166,11 +168,11 @@ export class Corner {
     return new Checker()
       .addCheck({
         check: () => !this.isOccupied(),
-        elseReason: "CORNER_OCCUPIED",
+        elseReason: CheckFailedReason.CornerOccupied,
       })
       .addCheck({
         check: () => this.adjacentCorners.every(({ corner }) => !corner.isOccupied()),
-        elseReason: "CORNER_ADJACENT_TO_OCCUPIED_CORNER",
+        elseReason: CheckFailedReason.CornerAdjacentToOccupiedCorner,
       })
       .run();
   }
@@ -179,7 +181,7 @@ export class Corner {
     return new Checker()
       .addCheck({
         check: () => this.hasSettlementOf(player),
-        elseReason: "CORNER_WITHOUT_SETTLEMENT",
+        elseReason: CheckFailedReason.CornerWithoutSettlement,
       })
       .run();
   }

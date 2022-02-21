@@ -1,10 +1,12 @@
 import type KnightCard from "./KnightCard";
+import { Checker } from "../Checks/Checker";
+import { CheckResult } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 import Game from "../Dynamics/Game";
 import Player from "../Dynamics/Player";
 import Resource from "../Resources/Resource";
 import ResourceBundle from "../Resources/ResourceBundle";
 import Turn from "../Turns/Turn";
-import { Checker, CheckResult } from "../Checks/Checks";
 
 let cardIds = 0;
 
@@ -44,15 +46,15 @@ export abstract class DevelopmentCard {
       .addChecks([
         {
           check: () => !this.played,
-          elseReason: "CARD_ALREADY_PLAYED",
+          elseReason: CheckFailedReason.CardAlreadyPlayed,
         },
         {
           check: () => this.holder !== null,
-          elseReason: "CARD_HAS_NO_HOLDER",
+          elseReason: CheckFailedReason.CardHasNoHolder,
         },
         {
           check: () => this.turnDrawn !== null && this.turnDrawn.hasFinished(),
-          elseReason: "CARD_DRAWN_IN_THIS_TURN",
+          elseReason: CheckFailedReason.CardDrawnInThisTurn,
         },
       ])
       .run();

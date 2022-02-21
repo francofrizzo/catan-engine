@@ -1,6 +1,4 @@
 import Construction from "./Construction";
-import Corner from "../Board/Corner";
-import Player from "../Dynamics/Player";
 import Resource from "../Resources/Resource";
 import ResourceBundle from "../Resources/ResourceBundle";
 

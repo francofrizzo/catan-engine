@@ -1,7 +1,8 @@
 import Tile from "./Tile";
-import GameplayError from "../Dynamics/GameplayError";
 import Player from "../Dynamics/Player";
-import { Checker, CheckResult } from "../Checks/Checks";
+import Checker from "../Checks/Checker";
+import { CheckResult } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 
 export class Thief {
   private position: Tile | null = null;
@@ -17,7 +18,7 @@ export class Thief {
     return new Checker()
       .addCheck({
         check: () => !this.position || !this.position.is(tile),
-        elseReason: "THIEF_IS_ALREADY_IN_TILE",
+        elseReason: CheckFailedReason.ThiefIsAlreadyInTile,
       })
       .run();
   }
@@ -31,15 +32,15 @@ export class Thief {
       .addChecks([
         {
           check: () => stealFrom === null || !player.is(stealFrom),
-          elseReason: "PLAYER_CANT_STEAL_FROM_THEMSELVES",
+          elseReason: CheckFailedReason.PlayerCantStealFromThemselves,
         },
         {
           check: () => stealFrom === null || stealablePlayers.some((player) => player.is(stealFrom)),
-          elseReason: "CANNOT_STEAL_FROM_THAT_PLAYER",
+          elseReason: CheckFailedReason.CannotStealFromThatPlayer,
         },
         {
           check: () => stealablePlayers.length === 0 || stealFrom !== null,
-          elseReason: "MUST_STEAL_FROM_SOME_PLAYER",
+          elseReason: CheckFailedReason.MustStealFromSomePlayer,
         },
       ])
       .run();

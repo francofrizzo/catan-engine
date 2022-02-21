@@ -2,12 +2,12 @@ import BoardBuilder from "./BoardBuilder";
 import Corner from "./Corner";
 import Thief from "./Thief";
 import Tile, { DesertTile } from "./Tile";
+import { Checker } from "../Checks/Checker";
 import { CheckResult } from "../Checks/Checks";
 import Road from "../Constructions/Road";
 import Settlement from "../Constructions/Settlement";
-import GameplayError from "../Dynamics/GameplayError";
 import Player from "../Dynamics/Player";
-import { Checker } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 
 export class Board {
   private tiles: Tile[] = [];
@@ -73,15 +73,15 @@ export class Board {
       .addChecks([
         {
           check: () => corner1.isAdjacentTo(corner2),
-          elseReason: "CORNERS_NOT_ADJACENT",
+          elseReason: CheckFailedReason.CornersNotAdjacent,
         },
         {
           check: () => !corner1.hasRoadTo(corner2),
-          elseReason: "EDGE_OCCUPIED",
+          elseReason: CheckFailedReason.EdgeOccupied,
         },
         {
           check: () => corner1.isConnectedToPlayer(player) || corner2.isConnectedToPlayer(player),
-          elseReason: "DISCONNECTED_EDGE",
+          elseReason: CheckFailedReason.DisconnectedEdge,
         },
         () => corner1.canAcceptRoad(player),
         () => corner2.canAcceptRoad(player),
@@ -94,7 +94,7 @@ export class Board {
     if (requireConnection) {
       checker.addCheck({
         check: () => corner.isConnectedToPlayer(player),
-        elseReason: "DISCONNECTED_CORNER",
+        elseReason: CheckFailedReason.DisconnectedCorner,
       });
     }
     checker.addCheck(() => corner.canAcceptSettlement());

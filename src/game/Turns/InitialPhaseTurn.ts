@@ -1,13 +1,13 @@
 import Turn from "./Turn";
+import Corner from "../Board/Corner";
 import { CheckResult, check } from "../Checks/Checks";
+import { CheckFailedError, CheckFailedReason } from "../Checks/FailedChecks";
 import City from "../Constructions/City";
 import Road from "../Constructions/Road";
 import Settlement from "../Constructions/Settlement";
 import DevelopmentCard from "../DevelopmentCards/DevelopmentCard";
 import Game from "../Dynamics/Game";
-import GameplayError from "../Dynamics/GameplayError";
 import Player from "../Dynamics/Player";
-import Corner from "../Board/Corner";
 
 export class InitialPhaseTurn extends Turn {
   private settlementBuilt: Settlement | null = null;
@@ -26,19 +26,19 @@ export class InitialPhaseTurn extends Turn {
   }
 
   public rollDice(): number {
-    throw new GameplayError("NOT_ALLOWED_IN_THIS_TURN");
+    throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
   public canBuildRoad(player: Player, [corner1, corner2]: [Corner, Corner]): CheckResult {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
-      { check: () => this.roadBuilt === null, elseReason: "ROAD_ALREADY_BUILT" },
-      { check: () => this.settlementBuilt !== null, elseReason: "SETTLEMENT_NOT_BUILT" },
+      { check: () => this.roadBuilt === null, elseReason: CheckFailedReason.RoadAlreadyBuilt },
+      { check: () => this.settlementBuilt !== null, elseReason: CheckFailedReason.SettlementNotBuilt },
       () => player.canBuildRoad([corner1, corner2], true),
       {
         check: () => this.settlementBuilt!.getCorner().is(corner1) || this.settlementBuilt!.getCorner().is(corner2),
-        elseReason: "ROAD_AND_SETTLEMENT_NOT_ADJACENT",
+        elseReason: CheckFailedReason.RoadAndSettlementNotAdjacent,
       },
     ]);
   }
@@ -56,7 +56,7 @@ export class InitialPhaseTurn extends Turn {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
-      { check: () => this.settlementBuilt === null, elseReason: "SETTLEMENT_ALREADY_BUILT" },
+      { check: () => this.settlementBuilt === null, elseReason: CheckFailedReason.SettlementAlreadyBuilt },
       () => player.canBuildSettlement(corner, true, false),
     ]);
   }
@@ -73,7 +73,7 @@ export class InitialPhaseTurn extends Turn {
   }
 
   public buildCity(): City {
-    throw new GameplayError("NOT_ALLOWED_IN_THIS_TURN");
+    throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
   public canBuyDevelopmentCard(): CheckResult {
@@ -81,7 +81,7 @@ export class InitialPhaseTurn extends Turn {
   }
 
   public buyDevelopmentCard(): DevelopmentCard {
-    throw new GameplayError("NOT_ALLOWED_IN_THIS_TURN");
+    throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
   public canPlayDevelopmentCard(): CheckResult {
@@ -89,7 +89,7 @@ export class InitialPhaseTurn extends Turn {
   }
 
   public playDevelopmentCard(): void {
-    throw new GameplayError("NOT_ALLOWED_IN_THIS_TURN");
+    throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
   public canCollect(): CheckResult {
@@ -97,7 +97,7 @@ export class InitialPhaseTurn extends Turn {
   }
 
   public collect(): void {
-    throw new GameplayError("NOT_ALLOWED_IN_THIS_TURN");
+    throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
   public canDiscard(): CheckResult {
@@ -105,7 +105,7 @@ export class InitialPhaseTurn extends Turn {
   }
 
   public discard(): void {
-    throw new GameplayError("NOT_ALLOWED_IN_THIS_TURN");
+    throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
   public canExchange(): CheckResult {
@@ -113,7 +113,7 @@ export class InitialPhaseTurn extends Turn {
   }
 
   public exchange(): void {
-    throw new GameplayError("NOT_ALLOWED_IN_THIS_TURN");
+    throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
   public canTrade(): CheckResult {
@@ -121,7 +121,7 @@ export class InitialPhaseTurn extends Turn {
   }
 
   public trade(): void {
-    throw new GameplayError("NOT_ALLOWED_IN_THIS_TURN");
+    throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
   public canMoveThief(): CheckResult {
@@ -129,15 +129,15 @@ export class InitialPhaseTurn extends Turn {
   }
 
   public moveThief(): void {
-    throw new GameplayError("NOT_ALLOWED_IN_THIS_TURN");
+    throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
   public canPass(player: Player): CheckResult {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
-      { check: () => this.settlementBuilt !== null, elseReason: "SETTLEMENT_NOT_BUILT" },
-      { check: () => this.roadBuilt !== null, elseReason: "ROAD_NOT_BUILT" },
+      { check: () => this.settlementBuilt !== null, elseReason: CheckFailedReason.SettlementNotBuilt },
+      { check: () => this.roadBuilt !== null, elseReason: CheckFailedReason.RoadNotBuilt },
     ]);
   }
 
@@ -152,7 +152,7 @@ export class InitialPhaseTurn extends Turn {
   // Checks
 
   protected notAllowedInThisTurn(): CheckResult {
-    return this.check([{ check: () => false, elseReason: "NOT_ALLOWED_IN_THIS_TURN" }]);
+    return this.check([{ check: () => false, elseReason: CheckFailedReason.NotAllowedInThisTurn }]);
   }
 }
 

@@ -1,7 +1,7 @@
 import DevelopmentCard from "./DevelopmentCard";
-import Game from "../Dynamics/Game";
-import GameplayError from "../Dynamics/GameplayError";
 import { CheckResult } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
+import Game from "../Dynamics/Game";
 
 export enum VictoryPointCardType {
   /* ⛪ */ Chapel = "Chapel",
@@ -19,7 +19,7 @@ export class VictoryPointCard extends DevelopmentCard {
   public canBePlayed(): CheckResult {
     return {
       value: false,
-      reason: "VICTORY_POINT_CARD_IS_NOT_PLAYABLE",
+      reason: CheckFailedReason.VictoryPointCardIsNotPlayable,
     };
   }
 

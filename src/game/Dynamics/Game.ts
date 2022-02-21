@@ -1,15 +1,16 @@
-import GameplayError from "./GameplayError";
 import Player from "./Player";
 import AchievementToken from "../AchievementTokens/AchievementToken";
 import LongestRouteToken from "../AchievementTokens/LongestRouteToken";
 import LargestArmyToken from "../AchievementTokens/LargestArmyToken";
 import Board from "../Board/Board";
+import Checker from "../Checks/Checker";
+import { CheckResult } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 import getDevelopmentCardDeck from "../DevelopmentCards/DeckGenerator";
 import DevelopmentCard from "../DevelopmentCards/DevelopmentCard";
 import Turn from "../Turns/Turn";
 import InitialPhaseTurn from "../Turns/InitialPhaseTurn";
 import NormalTurn from "../Turns/NormalTurn";
-import { Checker, CheckResult } from "../Checks/Checks";
 
 export interface GameOptions {
   autoCollect: boolean;
@@ -130,7 +131,7 @@ export class Game {
     return new Checker()
       .addCheck({
         check: () => this.developmentCardDeck.length > 0,
-        elseReason: "EMPTY_DECK",
+        elseReason: CheckFailedReason.EmptyDeck,
       })
       .run();
   }

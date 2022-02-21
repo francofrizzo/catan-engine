@@ -1,6 +1,8 @@
 import Corner from "../Board/Corner";
 import Tile from "../Board/Tile";
-import { Check, Checker, CheckResult, check } from "../Checks/Checks";
+import Checker from "../Checks/Checker";
+import { Check, CheckResult, check } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 import City from "../Constructions/City";
 import Road from "../Constructions/Road";
 import Settlement from "../Constructions/Settlement";
@@ -88,13 +90,13 @@ export abstract class Turn {
   protected turnNotFinished(): Check {
     return {
       check: () => !this.finished,
-      elseReason: "TURN_FINISHED",
+      elseReason: CheckFailedReason.TurnFinished,
     };
   }
   protected isCurrentPlayer(player: Player): Check {
     return {
       check: () => this.player.is(player),
-      elseReason: "OTHER_PLAYERS_TURN",
+      elseReason: CheckFailedReason.OtherPlayersTurn,
     };
   }
 }

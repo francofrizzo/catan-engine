@@ -2,6 +2,9 @@ import { shuffle } from "lodash";
 
 import Game from "./Game";
 import AchievementToken from "../AchievementTokens/AchievementToken";
+import Checker from "../Checks/Checker";
+import { CheckResult } from "../Checks/Checks";
+import { CheckFailedReason } from "../Checks/FailedChecks";
 import City from "../Constructions/City";
 import Construction from "../Constructions/Construction";
 import Road from "../Constructions/Road";
@@ -10,7 +13,6 @@ import DevelopmentCard from "../DevelopmentCards/DevelopmentCard";
 import Resource from "../Resources/Resource";
 import ResourceBundle from "../Resources/ResourceBundle";
 import Port from "../Ports/Port";
-import { Checker, CheckResult } from "../Checks/Checks";
 import Corner from "../Board/Corner";
 import Turn from "../Turns/Turn";
 
@@ -56,7 +58,7 @@ export class Player {
     return new Checker()
       .addCheck({
         check: () => this.has(resources),
-        elseReason: "NOT_ENOUGH_RESOURCES",
+        elseReason: CheckFailedReason.NotEnoughResources,
       })
       .run();
   }
@@ -85,23 +87,23 @@ export class Player {
       .addChecks([
         {
           check: () => !otherPlayer.is(this),
-          elseReason: "SAME_ORIGIN_AND_DESTINY_PLAYER",
+          elseReason: CheckFailedReason.SameOriginAndDestinyPlayer,
         },
         {
           check: () => !resourcesGiven.isEmpty(),
-          elseReason: "NO_RESOURCES_GIVEN",
+          elseReason: CheckFailedReason.NoResourcesGiven,
         },
         {
           check: () => !resourcesTaken.isEmpty(),
-          elseReason: "NO_RESOURCES_TAKEN",
+          elseReason: CheckFailedReason.NoResourcesTaken,
         },
         {
           check: () => this.has(resourcesGiven),
-          elseReason: "NOT_ENOUGH_RESOURCES",
+          elseReason: CheckFailedReason.NotEnoughResources,
         },
         {
           check: () => otherPlayer.has(resourcesTaken),
-          elseReason: "DESTINY_PLAYER_NOT_ENOUGH_RESOURCES",
+          elseReason: CheckFailedReason.DestinyPlayerNotEnoughResources,
         },
       ])
       .run();
@@ -118,7 +120,7 @@ export class Player {
     return new Checker()
       .addCheck({
         check: () => this.resources.has(resourceGiven, this.exchangeRate(resourceGiven)),
-        elseReason: "NOT_ENOUGH_RESOURCES",
+        elseReason: CheckFailedReason.NotEnoughResources,
       })
       .run();
   }
@@ -146,7 +148,7 @@ export class Player {
     if (!forFree) {
       checker.addCheck({
         check: () => this.has(Road.cost()),
-        elseReason: "NOT_ENOUGH_RESOURCES",
+        elseReason: CheckFailedReason.NotEnoughResources,
       });
     }
     return checker.addCheck(() => this.game.getBoard().canBuildRoad(this, corners)).run();
@@ -166,7 +168,7 @@ export class Player {
     if (!forFree) {
       checker.addCheck({
         check: () => this.has(Settlement.cost()),
-        elseReason: "NOT_ENOUGH_RESOURCES",
+        elseReason: CheckFailedReason.NotEnoughResources,
       });
     }
     return checker.addCheck(() => this.game.getBoard().canBuildSettlement(this, corner, requireConnection)).run();
@@ -188,7 +190,7 @@ export class Player {
     return new Checker()
       .addCheck({
         check: () => this.has(City.cost()),
-        elseReason: "NOT_ENOUGH_RESOURCES",
+        elseReason: CheckFailedReason.NotEnoughResources,
       })
       .addCheck(() => this.game.getBoard().canBuildCity(this, corner))
       .run();
@@ -211,7 +213,7 @@ export class Player {
       .addChecks([
         {
           check: () => this.has(DevelopmentCard.cost()),
-          elseReason: "NOT_ENOUGH_RESOURCES",
+          elseReason: CheckFailedReason.NotEnoughResources,
         },
         () => this.game.canDrawDevelopmentCard(),
       ])
@@ -230,7 +232,7 @@ export class Player {
       .addChecks([
         {
           check: () => card.getHolder()?.is(this) ?? false,
-          elseReason: "CARD_NOT_OWNED_BY_PLAYER",
+          elseReason: CheckFailedReason.CardNotOwnedByPlayer,
         },
         () => card.canBePlayed(),
       ])
