@@ -8,6 +8,8 @@ export abstract class Port {
   }
 
   public abstract accepts(resource: Resource): boolean;
+
+  public abstract acceptedResources(): Resource[];
 }
 
 export default Port;

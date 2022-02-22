@@ -7,6 +7,7 @@ import Player from "../Dynamics/Player";
 import Resource from "../Resources/Resource";
 import ResourceBundle from "../Resources/ResourceBundle";
 import Turn from "../Turns/Turn";
+import { DevelopmentCardType, VictoryPointCardType } from "./DevelopmentCardType";
 
 let cardIds = 0;
 
@@ -21,6 +22,8 @@ export abstract class DevelopmentCard {
   public getId(): number {
     return this.id;
   }
+
+  public abstract getType(): DevelopmentCardType | VictoryPointCardType;
 
   public is(card: DevelopmentCard): boolean;
   public is(id: number): boolean;
@@ -62,6 +65,10 @@ export abstract class DevelopmentCard {
 
   public play(): void {
     this.played = true;
+  }
+
+  public isPlayable(): boolean {
+    return this.turnDrawn ? this.turnDrawn.hasFinished() : false;
   }
 
   public wasPlayed(): boolean {

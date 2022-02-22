@@ -1,5 +1,6 @@
 import Corner from "../Board/Corner";
 import Player from "../Dynamics/Player";
+import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 import Resource from "../Resources/Resource";
 import ResourceBundle from "../Resources/ResourceBundle";
 
@@ -20,7 +21,7 @@ export class Road {
     } else if (corner.is(this.corners[1])) {
       return this.corners[0];
     } else {
-      throw Error("The provided corner is neither of the road ends");
+      throw new GameplayError(GameplayErrorReason.CornerDoesntBelongToRoad);
     }
   }
 

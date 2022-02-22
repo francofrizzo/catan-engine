@@ -2,12 +2,13 @@ import BoardBuilder from "./BoardBuilder";
 import Corner from "./Corner";
 import Thief from "./Thief";
 import Tile, { DesertTile } from "./Tile";
-import { Checker } from "../Checks/Checker";
+import Checker from "../Checks/Checker";
 import { CheckResult } from "../Checks/Checks";
 import Road from "../Constructions/Road";
 import Settlement from "../Constructions/Settlement";
 import Player from "../Dynamics/Player";
 import { CheckFailedReason } from "../Checks/FailedChecks";
+import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 
 export class Board {
   private tiles: Tile[] = [];
@@ -43,11 +44,15 @@ export class Board {
     this.thief.moveTo(player, tile, stealFrom);
   }
 
+  public getTiles(): Tile[] {
+    return this.tiles;
+  }
+
   public getTile(tileId: number): Tile {
     if (tileId < this.tiles.length) {
       return this.tiles[tileId];
     } else {
-      throw new Error(`There is no tile with id ${tileId}`);
+      throw new GameplayError(GameplayErrorReason.InvalidTileId);
     }
   }
 
@@ -56,16 +61,24 @@ export class Board {
     if (desertTile) {
       return desertTile;
     } else {
-      throw new Error(`There is no desert tile in the board`);
+      throw new GameplayError(GameplayErrorReason.NoDesertTile);
     }
+  }
+
+  public getCorners(): Corner[] {
+    return this.corners;
   }
 
   public getCorner(cornerId: number): Corner {
     if (cornerId < this.corners.length) {
       return this.corners[cornerId];
     } else {
-      throw new Error(`There is no corner with id ${cornerId}`);
+      throw new GameplayError(GameplayErrorReason.InvalidCornerId);
     }
+  }
+
+  public getRoads(): Road[] {
+    return this.roads;
   }
 
   public canBuildRoad(player: Player, [corner1, corner2]: [Corner, Corner]): CheckResult {

@@ -11,12 +11,14 @@ import Resource from "../Resources/Resource";
 import ResourceBundle from "../Resources/ResourceBundle";
 import Corner from "../Board/Corner";
 import Tile from "../Board/Tile";
+import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 
 export class NormalTurn extends Turn {
   protected diceRoll: number | null = null;
   protected collectedResources: Record<number, ResourceBundle> = {};
   protected resourcesToDiscard: Record<number, number> = {};
   protected thiefMovedTo: Tile | null = null;
+  protected developmentCardPlayed: DevelopmentCard | null = null;
 
   constructor(game: Game, player: Player) {
     super(game, player);
@@ -52,8 +54,8 @@ export class NormalTurn extends Turn {
     return this.diceRoll;
   }
 
-  public canBuildRoad(player: Player, [corner1, corner2]: [Corner, Corner]): CheckResult {
-    return this.check([() => player.canBuildRoad([corner1, corner2], false)]);
+  public canBuildRoad(player: Player, corners?: [Corner, Corner]): CheckResult {
+    return this.check([() => player.canBuildRoad(corners, false)]);
   }
 
   @check((turn: NormalTurn, player: Player, [corner1, corner2]: [Corner, Corner]) =>
@@ -63,7 +65,7 @@ export class NormalTurn extends Turn {
     return player.buildRoad([corner1, corner2]);
   }
 
-  public canBuildSettlement(player: Player, corner: Corner): CheckResult {
+  public canBuildSettlement(player: Player, corner?: Corner): CheckResult {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
@@ -77,7 +79,7 @@ export class NormalTurn extends Turn {
     return player.buildSettlement(corner);
   }
 
-  public canBuildCity(player: Player, corner: Corner): CheckResult {
+  public canBuildCity(player: Player, corner?: Corner): CheckResult {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
@@ -105,29 +107,37 @@ export class NormalTurn extends Turn {
     return player.buyDevelopmentCard(this);
   }
 
-  public canPlayDevelopmentCard(player: Player, card: DevelopmentCard): CheckResult {
-    return this.check([
+  public canPlayDevelopmentCard(player: Player, card?: DevelopmentCard): CheckResult {
+    const checks = [
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       ...this.afterThiefSequence(),
-      () => player.canPlayDevelopmentCard(card),
-    ]);
+      {
+        check: () => this.developmentCardPlayed === null,
+        elseReason: CheckFailedReason.DevelopmentCardAlreadyPlayedInTurn,
+      },
+    ];
+    if (card !== undefined) {
+      checks.push(() => player.canPlayDevelopmentCard(card));
+    }
+    return this.check(checks);
   }
 
   @check((turn: NormalTurn, player: Player, card: DevelopmentCard) => turn.canPlayDevelopmentCard(player, card))
   public playDevelopmentCard(player: Player, card: DevelopmentCard): void {
     player.playDevelopmentCard(card);
+    this.developmentCardPlayed = card;
   }
 
-  public canCollect(player: Player, resources: ResourceBundle): CheckResult {
-    return this.check([
-      this.turnNotFinished(),
-      this.isCurrentPlayer(player),
-      {
+  public canCollect(player: Player, resources?: ResourceBundle): CheckResult {
+    const checks = [this.turnNotFinished(), this.isCurrentPlayer(player)];
+    if (resources !== undefined) {
+      checks.push({
         check: () => this.collectibleResources(player).hasAll(resources),
         elseReason: CheckFailedReason.ResourcesNotAvailable,
-      },
-    ]);
+      });
+    }
+    return this.check(checks);
   }
 
   @check((turn: NormalTurn, player: Player, resources: ResourceBundle) => turn.canCollect(player, resources))
@@ -136,15 +146,16 @@ export class NormalTurn extends Turn {
     this.collectedResources[player.getId()].addAll(resources);
   }
 
-  public canDiscard(player: Player, resources: ResourceBundle): CheckResult {
-    return this.check([
-      this.turnNotFinished(),
-      () => player.canGiveAway(resources),
-      {
+  public canDiscard(player: Player, resources?: ResourceBundle): CheckResult {
+    const checks = [this.turnNotFinished()];
+    if (resources !== undefined) {
+      checks.push(() => player.canGiveAway(resources));
+      checks.push({
         check: () => this.resourcesToDiscard[player.getId()] >= resources.total(),
         elseReason: CheckFailedReason.ResourcesNotDiscardable,
-      },
-    ]);
+      });
+    }
+    return this.check(checks);
   }
 
   @check((turn: NormalTurn, player: Player, resources: ResourceBundle) => turn.canDiscard(player, resources))
@@ -155,16 +166,15 @@ export class NormalTurn extends Turn {
 
   public canExchange(
     player: Player,
-    otherPlayer: Player,
-    resourcesGiven: ResourceBundle,
-    resourcesTaken: ResourceBundle
+    otherPlayer?: Player,
+    resourcesGiven?: ResourceBundle,
+    resourcesTaken?: ResourceBundle
   ): CheckResult {
-    return this.check([
-      this.turnNotFinished(),
-      this.isCurrentPlayer(player),
-      ...this.afterThiefSequence(),
-      () => this.player.canExchange(otherPlayer, resourcesGiven, resourcesTaken),
-    ]);
+    const checks = [this.turnNotFinished(), this.isCurrentPlayer(player), ...this.afterThiefSequence()];
+    if (otherPlayer !== undefined && resourcesGiven !== undefined && resourcesTaken !== undefined) {
+      checks.push(() => this.player.canExchange(otherPlayer, resourcesGiven, resourcesTaken));
+    }
+    return this.check(checks);
   }
 
   @check(
@@ -185,13 +195,12 @@ export class NormalTurn extends Turn {
     player.exchange(otherPlayer, resourcesGiven, resourcesTaken);
   }
 
-  public canTrade(player: Player, resourceTaken: Resource, resourceGiven: Resource): CheckResult {
-    return this.check([
-      this.turnNotFinished(),
-      this.isCurrentPlayer(player),
-      ...this.afterThiefSequence(),
-      () => this.player.canTrade(resourceTaken, resourceGiven),
-    ]);
+  public canTrade(player: Player, resourceTaken?: Resource, resourceGiven?: Resource): CheckResult {
+    const checks = [this.turnNotFinished(), this.isCurrentPlayer(player), ...this.afterThiefSequence()];
+    if (resourceTaken !== undefined && resourceGiven !== undefined) {
+      checks.push(() => this.player.canTrade(resourceTaken, resourceGiven));
+    }
+    return this.check(checks);
   }
 
   @check((turn: NormalTurn, player: Player, resourceTaken: Resource, resourceGiven: Resource) =>
@@ -201,14 +210,17 @@ export class NormalTurn extends Turn {
     this.player.trade(resourceTaken, resourceGiven);
   }
 
-  public canMoveThief(player: Player, tile: Tile, stealFrom: Player | null): CheckResult {
-    return this.check([
+  public canMoveThief(player: Player, tile?: Tile, stealFrom?: Player | null): CheckResult {
+    const checks = [
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       { check: () => this.diceRoll === 7, elseReason: CheckFailedReason.DiceRollIsNot7 },
       { check: () => this.thiefMovedTo === null, elseReason: CheckFailedReason.ThiefAlreadyMoved },
-      () => this.game.getBoard().canMoveThief(player, tile, stealFrom),
-    ]);
+    ];
+    if (tile !== undefined && stealFrom !== undefined) {
+      checks.push(() => this.game.getBoard().canMoveThief(player, tile, stealFrom));
+    }
+    return this.check(checks);
   }
 
   @check((turn: NormalTurn, player: Player, tile: Tile, stealFrom: Player | null) =>
@@ -225,10 +237,10 @@ export class NormalTurn extends Turn {
 
   @check((turn: NormalTurn, player: Player) => turn.canPass(player))
   public pass(player: Player): void {
-    if (this.player.victoryPoints() >= 10) {
+    if (this.player.getVictoryPoints() >= 10) {
       this.game.win(this.player);
     }
-    this.game.awardTokens(this.player);
+    this.game.awardTokensToPlayer(this.player);
     super.pass(player);
   }
 
@@ -236,7 +248,7 @@ export class NormalTurn extends Turn {
     if (this.diceRoll !== null) {
       return player.getCollectibleResources(this.diceRoll).subtractAll(this.collectedResources[player.getId()]);
     } else {
-      throw new Error("The dice have not been rolled");
+      throw new GameplayError(GameplayErrorReason.DiceNotRolled);
     }
   }
 

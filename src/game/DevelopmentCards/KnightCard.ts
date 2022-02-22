@@ -1,13 +1,19 @@
 import DevelopmentCard from "./DevelopmentCard";
+import { DevelopmentCardType } from "./DevelopmentCardType";
 import Player from "../Dynamics/Player";
 import Checker from "../Checks/Checker";
 import { CheckResult } from "../Checks/Checks";
 import { CheckFailedReason } from "../Checks/FailedChecks";
 import Tile from "../Board/Tile";
+import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 
 export class KnightCard extends DevelopmentCard {
   private destinyTile: Tile | null = null;
   private stealFrom: Player | null = null;
+
+  public getType(): DevelopmentCardType {
+    return DevelopmentCardType.Knight;
+  }
 
   public victoryPoints(): number {
     return 0;
@@ -36,7 +42,7 @@ export class KnightCard extends DevelopmentCard {
       this.game.getBoard().moveThief(this.holder!, this.destinyTile, this.stealFrom);
       super.play();
     } else {
-      throw Error("Some arguments for playing this card are undefined");
+      throw new GameplayError(GameplayErrorReason.UndefinedDevelopmentCardArguments);
     }
   }
 

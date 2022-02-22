@@ -10,6 +10,7 @@ import Settlement from "../Constructions/Settlement";
 import Player from "../Dynamics/Player";
 import ResourceBundle from "../Resources/ResourceBundle";
 import Port from "../Ports/Port";
+import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 
 export class Corner {
   private adjacentTiles: Tile[] = [];
@@ -65,7 +66,7 @@ export class Corner {
     if (otherCorner) {
       otherCorner.road = road;
     } else {
-      throw Error(`The corners ${this.id} and ${otherEnd.id} are not adjacent`);
+      throw new GameplayError(GameplayErrorReason.CornersNotAdjacent);
     }
   }
 
@@ -77,6 +78,10 @@ export class Corner {
 
   public getAdjacentCorners(): Corner[] {
     return this.adjacentCorners.map(({ corner }) => corner);
+  }
+
+  public getRoads(): Road[] {
+    return this.adjacentCorners.filter(({ road }) => road !== null).map(({ road }) => road!);
   }
 
   public getAdjacentTiles(): Tile[] {

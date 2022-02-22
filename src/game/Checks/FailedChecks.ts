@@ -42,6 +42,7 @@ export enum CheckFailedReason {
   ThiefNotMoved = "THIEF_NOT_MOVED",
   TurnFinished = "TURN_FINISHED",
   OtherPlayersTurn = "OTHER_PLAYERS_TURN",
+  DevelopmentCardAlreadyPlayedInTurn = "DEVELOPMENT_CARD_ALREADY_PLAYED_IN_TURN",
 }
 
 export class CheckFailedError extends Error {}

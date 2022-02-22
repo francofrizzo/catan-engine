@@ -72,12 +72,7 @@ export class DesertTile extends Tile {
 }
 
 export class ResourceTile extends Tile {
-  constructor(
-    board: Board,
-    id: number,
-    private resource: Resource,
-    private number: number
-  ) {
+  constructor(board: Board, id: number, private resource: Resource, private number: number) {
     super(board, id);
   }
 

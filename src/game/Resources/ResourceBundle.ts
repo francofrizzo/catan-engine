@@ -1,3 +1,4 @@
+import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 import Resource from "./Resource";
 
 export class ResourceBundle {
@@ -35,14 +36,12 @@ export class ResourceBundle {
       });
       return this;
     } else {
-      throw Error("There are not enough resources in this bundle");
+      throw new GameplayError(GameplayErrorReason.NotEnoughResources);
     }
   }
 
   public hasAll(otherBundle: ResourceBundle): boolean {
-    return otherBundle.every((resource, quantity) =>
-      this.has(resource, quantity)
-    );
+    return otherBundle.every((resource, quantity) => this.has(resource, quantity));
   }
 
   public isEmpty() {
@@ -63,7 +62,7 @@ export class ResourceBundle {
       this.resources[resource] -= quantity;
       return this;
     } else {
-      throw Error(`There is not enough ${resource} in this bundle`);
+      throw new GameplayError(GameplayErrorReason.NotEnoughResources);
     }
   }
 
@@ -80,25 +79,19 @@ export class ResourceBundle {
     );
   }
 
-  public forEach(
-    forEachFunction: (resource: Resource, quantity: number) => void
-  ): void {
+  public forEach(forEachFunction: (resource: Resource, quantity: number) => void): void {
     return (Object.keys(this.resources) as Resource[]).forEach((resource) =>
       forEachFunction(resource, this.resources[resource])
     );
   }
 
-  public some(
-    predicate: (resource: Resource, quantity: number) => boolean
-  ): boolean {
+  public some(predicate: (resource: Resource, quantity: number) => boolean): boolean {
     return (Object.keys(this.resources) as Resource[]).some((resource) =>
       predicate(resource, this.resources[resource])
     );
   }
 
-  public every(
-    predicate: (resource: Resource, quantity: number) => boolean
-  ): boolean {
+  public every(predicate: (resource: Resource, quantity: number) => boolean): boolean {
     return (Object.keys(this.resources) as Resource[]).every((resource) =>
       predicate(resource, this.resources[resource])
     );

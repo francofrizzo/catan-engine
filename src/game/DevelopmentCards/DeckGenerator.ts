@@ -1,10 +1,11 @@
 import { shuffle } from "lodash";
 
 import DevelopmentCard from "./DevelopmentCard";
+import { VictoryPointCardType } from "./DevelopmentCardType";
 import KnightCard from "./KnightCard";
 import MonopolyCard from "./MonopolyCard";
 import RoadBuildingCard from "./RoadBuildingCard";
-import VictoryPointCard, { VictoryPointCardType } from "./VictoryPointCard";
+import VictoryPointCard from "./VictoryPointCard";
 import YearOfPlentyCard from "./YearOfPlentyCard";
 import Game from "../Dynamics/Game";
 

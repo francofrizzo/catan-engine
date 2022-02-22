@@ -9,6 +9,10 @@ export class ResourcePort extends Port {
   public accepts(resource: Resource): boolean {
     return resource === this.resource;
   }
+
+  public acceptedResources(): Resource[] {
+    return [this.resource];
+  }
 }
 
 export default ResourcePort;

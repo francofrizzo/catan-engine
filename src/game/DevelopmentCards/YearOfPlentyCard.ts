@@ -1,12 +1,18 @@
 import DevelopmentCard from "./DevelopmentCard";
+import { DevelopmentCardType } from "./DevelopmentCardType";
 import Resource from "../Resources/Resource";
 import ResourceBundle from "../Resources/ResourceBundle";
 import { CheckResult } from "../Checks/Checks";
 import Checker from "../Checks/Checker";
 import { CheckFailedReason } from "../Checks/FailedChecks";
+import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 
 export class YearOfPlentyCard extends DevelopmentCard {
   private resources: [Resource, Resource] | null = null;
+
+  public getType(): DevelopmentCardType {
+    return DevelopmentCardType.YearOfPlenty;
+  }
 
   public victoryPoints(): number {
     return 0;
@@ -33,7 +39,7 @@ export class YearOfPlentyCard extends DevelopmentCard {
       this.holder.recieve(resourcesToRecieve);
       super.play();
     } else {
-      throw Error("Some arguments for playing this card are undefined");
+      throw new GameplayError(GameplayErrorReason.UndefinedDevelopmentCardArguments);
     }
   }
 }

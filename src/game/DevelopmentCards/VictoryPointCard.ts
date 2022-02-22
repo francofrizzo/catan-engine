@@ -1,19 +1,17 @@
 import DevelopmentCard from "./DevelopmentCard";
+import { VictoryPointCardType } from "./DevelopmentCardType";
 import { CheckResult } from "../Checks/Checks";
 import { CheckFailedReason } from "../Checks/FailedChecks";
 import Game from "../Dynamics/Game";
-
-export enum VictoryPointCardType {
-  /* ⛪ */ Chapel = "Chapel",
-  /* 🏰 */ GreatHall = "Great Hall",
-  /* 📚 */ Library = "Library",
-  /* 🍎 */ Market = "Market",
-  /* 🎓 */ University = "University",
-}
+import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 
 export class VictoryPointCard extends DevelopmentCard {
   constructor(game: Game, private type: VictoryPointCardType) {
     super(game);
+  }
+
+  public getType(): VictoryPointCardType {
+    return this.type;
   }
 
   public canBePlayed(): CheckResult {
@@ -23,8 +21,12 @@ export class VictoryPointCard extends DevelopmentCard {
     };
   }
 
+  public isPlayable(): boolean {
+    return false;
+  }
+
   public play() {
-    throw new Error("A Victory Point Development Card cannot be played");
+    throw new GameplayError(GameplayErrorReason.VictoryPointCardIsNotPlayable);
   }
 
   public victoryPoints(): number {

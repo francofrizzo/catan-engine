@@ -6,4 +6,6 @@ export enum Resource {
   /* 🪨 */ Ore = "Ore",
 }
 
+export const allResources = [Resource.Brick, Resource.Grain, Resource.Lumber, Resource.Ore, Resource.Wool];
+
 export default Resource;

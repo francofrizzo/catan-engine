@@ -15,6 +15,7 @@ import ResourceBundle from "../Resources/ResourceBundle";
 import Port from "../Ports/Port";
 import Corner from "../Board/Corner";
 import Turn from "../Turns/Turn";
+import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 
 export class Player {
   private resources: ResourceBundle = new ResourceBundle();
@@ -143,7 +144,7 @@ export class Player {
 
   // Constructions
 
-  public canBuildRoad(corners: [Corner, Corner], forFree: boolean): CheckResult {
+  public canBuildRoad(corners: [Corner, Corner] | undefined, forFree: boolean): CheckResult {
     const checker = new Checker();
     if (!forFree) {
       checker.addCheck({
@@ -151,7 +152,10 @@ export class Player {
         elseReason: CheckFailedReason.NotEnoughResources,
       });
     }
-    return checker.addCheck(() => this.game.getBoard().canBuildRoad(this, corners)).run();
+    if (corners !== undefined) {
+      checker.addCheck(() => this.game.getBoard().canBuildRoad(this, corners));
+    }
+    return checker.run();
   }
 
   public buildRoad(corners: [Corner, Corner], forFree = false): Road {
@@ -163,7 +167,7 @@ export class Player {
     return road;
   }
 
-  public canBuildSettlement(corner: Corner, forFree: boolean, requireConnection: boolean): CheckResult {
+  public canBuildSettlement(corner: Corner | undefined, forFree: boolean, requireConnection: boolean): CheckResult {
     const checker = new Checker();
     if (!forFree) {
       checker.addCheck({
@@ -171,7 +175,10 @@ export class Player {
         elseReason: CheckFailedReason.NotEnoughResources,
       });
     }
-    return checker.addCheck(() => this.game.getBoard().canBuildSettlement(this, corner, requireConnection)).run();
+    if (corner !== undefined) {
+      checker.addCheck(() => this.game.getBoard().canBuildSettlement(this, corner, requireConnection));
+    }
+    return checker.run();
   }
 
   public buildSettlement(corner: Corner, forFree = false): Settlement {
@@ -186,14 +193,15 @@ export class Player {
     return settlement;
   }
 
-  public canBuildCity(corner: Corner): CheckResult {
-    return new Checker()
-      .addCheck({
-        check: () => this.has(City.cost()),
-        elseReason: CheckFailedReason.NotEnoughResources,
-      })
-      .addCheck(() => this.game.getBoard().canBuildCity(this, corner))
-      .run();
+  public canBuildCity(corner: Corner | undefined): CheckResult {
+    const checker = new Checker().addCheck({
+      check: () => this.has(City.cost()),
+      elseReason: CheckFailedReason.NotEnoughResources,
+    });
+    if (corner !== undefined) {
+      checker.addCheck(() => this.game.getBoard().canBuildCity(this, corner));
+    }
+    return checker.run();
   }
 
   public buildCity(corner: Corner): City {
@@ -243,6 +251,14 @@ export class Player {
     card.play();
   }
 
+  public getDevelopmentCards(): DevelopmentCard[] {
+    return this.developmentCards;
+  }
+
+  public getPlayedDevelopmentCards(): DevelopmentCard[] {
+    return this.developmentCards.filter((card) => card.wasPlayed());
+  }
+
   public getResources(): ResourceBundle {
     return this.resources;
   }
@@ -254,7 +270,7 @@ export class Player {
   }
 
   public getLongestRoute(): Road[] {
-    // TODO: Actually compute the longest road
+    // TODO: Actually compute the longest route
     return this.roads;
   }
 
@@ -275,19 +291,27 @@ export class Player {
     if (index >= 0) {
       this.achievementTokens.splice(index, 1);
     } else {
-      throw Error(`${this.name} doesn't have the Achivement Token ${token.getId()}`);
+      throw new GameplayError(GameplayErrorReason.AchievementTokenNotOwnedByPlayer);
     }
   }
 
-  public victoryPoints(): number {
+  public getAchievementTokens(): AchievementToken[] {
+    return this.achievementTokens;
+  }
+
+  public getVisibleVictoryPoints(): number {
     const constructionPoints = this.constructions
       .map((construction) => construction.victoryPoints())
       .reduce((x, y) => x + y, 0);
-    const developmentCardPoints = this.developmentCards.map((card) => card.victoryPoints()).reduce((x, y) => x + y, 0);
     const achievementTokenPoints = this.achievementTokens
       .map((achievementToken) => achievementToken.victoryPoints())
       .reduce((x, y) => x + y, 0);
-    return constructionPoints + developmentCardPoints + achievementTokenPoints;
+    return constructionPoints + achievementTokenPoints;
+  }
+
+  public getVictoryPoints(): number {
+    const developmentCardPoints = this.developmentCards.map((card) => card.victoryPoints()).reduce((x, y) => x + y, 0);
+    return this.getVisibleVictoryPoints() + developmentCardPoints;
   }
 }
 

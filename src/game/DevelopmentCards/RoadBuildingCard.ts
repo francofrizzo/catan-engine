@@ -1,11 +1,17 @@
 import DevelopmentCard from "./DevelopmentCard";
+import { DevelopmentCardType } from "./DevelopmentCardType";
 import Corner from "../Board/Corner";
 import Checker from "../Checks/Checker";
 import { CheckResult } from "../Checks/Checks";
 import { CheckFailedReason } from "../Checks/FailedChecks";
+import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 
 export class RoadBuildingCard extends DevelopmentCard {
   private corners: null | [[Corner, Corner], [Corner, Corner]] = null;
+
+  public getType(): DevelopmentCardType {
+    return DevelopmentCardType.RoadBuilding;
+  }
 
   public victoryPoints(): number {
     return 0;
@@ -32,7 +38,7 @@ export class RoadBuildingCard extends DevelopmentCard {
       this.holder.buildRoad(this.corners[1], true);
       super.play();
     } else {
-      throw Error("Some arguments for playing this card are undefined");
+      throw new GameplayError(GameplayErrorReason.UndefinedDevelopmentCardArguments);
     }
   }
 }

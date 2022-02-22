@@ -1,4 +1,5 @@
 import Player from "../Dynamics/Player";
+import AchievementTokenType from "./AchievementTokenType";
 
 let tokenIds = 0;
 
@@ -9,6 +10,8 @@ export abstract class AchievementToken {
   public getId(): number {
     return this.id;
   }
+
+  public abstract getType(): AchievementTokenType;
 
   public is(token: AchievementToken): boolean;
   public is(id: number): boolean;
@@ -21,15 +24,11 @@ export abstract class AchievementToken {
   }
 
   public awardTo(player: Player): void {
-    if (this.canBeAwardedTo(player)) {
-      if (this.holder !== null) {
-        this.holder.removeAchievementToken(this);
-      }
-      player.addAchievementToken(this);
-      this.holder = player;
-    } else {
-      throw new Error(`${player.getName()} cannot be awarded the ${this}`);
+    if (this.holder !== null) {
+      this.holder.removeAchievementToken(this);
     }
+    player.addAchievementToken(this);
+    this.holder = player;
   }
 
   public canBeAwardedTo(player: Player): boolean {

@@ -30,12 +30,15 @@ export abstract class Turn {
   public abstract rollDice(player: Player): number;
 
   // Constructions
+  public abstract canBuildRoad(player: Player): CheckResult;
   public abstract canBuildRoad(player: Player, [corner1, corner2]: [Corner, Corner]): CheckResult;
   public abstract buildRoad(player: Player, [corner1, corner2]: [Corner, Corner]): Road;
 
+  public abstract canBuildSettlement(player: Player): CheckResult;
   public abstract canBuildSettlement(player: Player, corner: Corner): CheckResult;
   public abstract buildSettlement(player: Player, corner: Corner): Settlement;
 
+  public abstract canBuildCity(player: Player): CheckResult;
   public abstract canBuildCity(player: Player, corner: Corner): CheckResult;
   public abstract buildCity(player: Player, corner: Corner): City;
 
@@ -43,16 +46,20 @@ export abstract class Turn {
   public abstract canBuyDevelopmentCard(player: Player): CheckResult;
   public abstract buyDevelopmentCard(player: Player): DevelopmentCard;
 
+  public abstract canPlayDevelopmentCard(player: Player): CheckResult;
   public abstract canPlayDevelopmentCard(player: Player, card: DevelopmentCard): CheckResult;
   public abstract playDevelopmentCard(player: Player, card: DevelopmentCard): void;
 
   // Resources
+  public abstract canCollect(player: Player): CheckResult;
   public abstract canCollect(player: Player, resources: ResourceBundle): CheckResult;
   public abstract collect(player: Player, resources: ResourceBundle): void;
 
+  public abstract canDiscard(player: Player): CheckResult;
   public abstract canDiscard(player: Player, resources: ResourceBundle): CheckResult;
   public abstract discard(player: Player, resources: ResourceBundle): void;
 
+  public abstract canExchange(player: Player): CheckResult;
   public abstract canExchange(
     player: Player,
     otherPlayer: Player,
@@ -66,10 +73,12 @@ export abstract class Turn {
     resourcesTaken: ResourceBundle
   ): void;
 
+  public abstract canTrade(player: Player): CheckResult;
   public abstract canTrade(player: Player, resourceTaken: Resource, resourceGiven: Resource): CheckResult;
   public abstract trade(player: Player, resourceTaken: Resource, resourceGiven: Resource): void;
 
   // Thief
+  public abstract canMoveThief(player: Player): CheckResult;
   public abstract canMoveThief(player: Player, tile: Tile, stealFrom: Player | null): CheckResult;
   public abstract moveThief(player: Player, tile: Tile, stealFrom: Player | null): void;
 

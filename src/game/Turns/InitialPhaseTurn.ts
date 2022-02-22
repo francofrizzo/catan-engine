@@ -29,18 +29,22 @@ export class InitialPhaseTurn extends Turn {
     throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
-  public canBuildRoad(player: Player, [corner1, corner2]: [Corner, Corner]): CheckResult {
-    return this.check([
+  public canBuildRoad(player: Player, corners?: [Corner, Corner]): CheckResult {
+    const checks = [
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       { check: () => this.roadBuilt === null, elseReason: CheckFailedReason.RoadAlreadyBuilt },
       { check: () => this.settlementBuilt !== null, elseReason: CheckFailedReason.SettlementNotBuilt },
-      () => player.canBuildRoad([corner1, corner2], true),
-      {
-        check: () => this.settlementBuilt!.getCorner().is(corner1) || this.settlementBuilt!.getCorner().is(corner2),
+      () => player.canBuildRoad(corners, true),
+    ];
+    if (corners !== undefined) {
+      checks.push({
+        check: () =>
+          this.settlementBuilt!.getCorner().is(corners[0]) || this.settlementBuilt!.getCorner().is(corners[1]),
         elseReason: CheckFailedReason.RoadAndSettlementNotAdjacent,
-      },
-    ]);
+      });
+    }
+    return this.check(checks);
   }
 
   @check((turn: InitialPhaseTurn, player: Player, [corner1, corner2]: [Corner, Corner]) =>
@@ -52,7 +56,7 @@ export class InitialPhaseTurn extends Turn {
     return road;
   }
 
-  public canBuildSettlement(player: Player, corner: Corner): CheckResult {
+  public canBuildSettlement(player: Player, corner?: Corner): CheckResult {
     return this.check([
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
