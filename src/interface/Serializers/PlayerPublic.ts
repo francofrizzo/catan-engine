@@ -10,6 +10,8 @@ export const serializePlayerPlublic = (player: Player) => {
     achievementTokens: player.getAchievementTokens().map((token) => serializeAchievementToken(token)),
     resourcesCount: player.getResourcesCount(),
     visibleVictoryPoints: player.getVisibleVictoryPoints(),
-    longestRoute: player.getLongestRoute(),
+    longestRoute: player
+      .getLongestRoute()
+      .map((road) => road.getCorners().map((corner) => corner.getId()) as [number, number]),
   };
 };

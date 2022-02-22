@@ -93,9 +93,8 @@ export class GameInterface {
     } catch (err: any) {
       if (err instanceof CheckFailedError || err instanceof GameplayError) {
         this.callbacks.onActionError.forEach((callback) => callback(err, this, action, player, parsedArgs));
-      } else {
-        throw Error("Error executing action: " + err);
       }
+      throw Error("Error executing action: " + err);
     }
   }
 
@@ -105,6 +104,7 @@ export class GameInterface {
       return argumentParser(args);
     } catch (err: any) {
       this.callbacks.onArgumentParseError.forEach((callback) => callback(err, this, action, player, args));
+      throw Error("Error parsing arguments" + err);
     }
   }
 }

@@ -88,6 +88,10 @@ export class Game {
     this.winner = player;
   }
 
+  public getWinner(): Player | null {
+    return this.winner;
+  }
+
   // Players
 
   public getPlayers(): Player[] {

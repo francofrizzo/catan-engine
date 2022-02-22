@@ -54,6 +54,10 @@ export class NormalTurn extends Turn {
     return this.diceRoll;
   }
 
+  public getDiceRoll(): number | null {
+    return this.diceRoll;
+  }
+
   public canBuildRoad(player: Player, corners?: [Corner, Corner]): CheckResult {
     return this.check([() => player.canBuildRoad(corners, false)]);
   }

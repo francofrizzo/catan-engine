@@ -29,6 +29,10 @@ export class InitialPhaseTurn extends Turn {
     throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
+  public getDiceRoll(): null {
+    return null;
+  }
+
   public canBuildRoad(player: Player, corners?: [Corner, Corner]): CheckResult {
     const checks = [
       this.turnNotFinished(),

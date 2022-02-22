@@ -7,7 +7,9 @@ export const serializeCorner = (corner: Corner) => {
     id: corner.getId(),
     adjacentCorners: corner.getAdjacentCorners().map((corner) => corner.getId()),
     adjacentTiles: corner.getAdjacentTiles().map((tile) => tile.getId()),
-    roads: corner.getRoads().map((road) => ({ to: road.getOtherEnd(corner), player: road.getPlayer().getId() })),
+    roads: corner
+      .getRoads()
+      .map((road) => ({ to: road.getOtherEnd(corner).getId(), player: road.getPlayer().getId() })),
     port: corner.hasPort() ? serializePort(corner.getPort()!) : null,
     construction: corner.isOccupied() ? serializeConstruction(corner.getConstruction()!) : null,
   };
