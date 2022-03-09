@@ -153,11 +153,11 @@ export class Corner {
   }
 
   public isAdjacentTo(anotherCorner: Corner) {
-    return this.adjacentCorners.some(({ corner }) => corner.id === anotherCorner.id);
+    return this.adjacentCorners.some(({ corner }) => corner.is(anotherCorner));
   }
 
   public hasRoadTo(anotherCorner: Corner) {
-    return this.adjacentCorners.some(({ corner, road }) => corner.id === anotherCorner.id && road !== null);
+    return this.adjacentCorners.some(({ corner, road }) => corner.is(anotherCorner) && road !== null);
   }
 
   public canAcceptRoad(player: Player): CheckResult {

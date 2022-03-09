@@ -29,10 +29,7 @@ const sliceRound = <T>(arr: T[], start: number, count: number): T[] => {
   const actualStart = mod(start, arr.length);
   return actualStart + count <= arr.length
     ? arr.slice(actualStart, actualStart + count)
-    : [
-        ...arr.slice(actualStart),
-        ...arr.slice(0, actualStart + count - arr.length),
-      ];
+    : [...arr.slice(actualStart), ...arr.slice(0, actualStart + count - arr.length)];
 };
 
 export class BoardBuilder {
@@ -41,9 +38,7 @@ export class BoardBuilder {
 
   constructor(private layerCount: number) {
     const provisionalCornerDescriptions = this.buildCornerDescriptions();
-    this.tileDescriptions = this.buildTileDescriptions(
-      provisionalCornerDescriptions
-    );
+    this.tileDescriptions = this.buildTileDescriptions(provisionalCornerDescriptions);
     this.cornerDescriptions = this.addAdjacentTilesToCornerDescriptions(
       provisionalCornerDescriptions,
       this.tileDescriptions
@@ -80,12 +75,7 @@ export class BoardBuilder {
     return this.tileDescriptions.map((tileDescription, index) => {
       const resource = resources[index];
       if (resource !== null) {
-        const tile = new ResourceTile(
-          board,
-          index,
-          resource,
-          numbers[numberIndex]
-        );
+        const tile = new ResourceTile(board, index, resource, numbers[numberIndex]);
         numberIndex++;
         return tile;
       } else {
@@ -97,25 +87,16 @@ export class BoardBuilder {
   private addCornersToTiles(tiles: Tile[], corners: Corner[]): void {
     tiles.forEach((tile, tileIndex) => {
       const tileDescription = this.tileDescriptions[tileIndex];
-      tile.addCorners(
-        ...tileDescription.corners.map((cornerIndex) => corners[cornerIndex])
-      );
+      tile.addCorners(...tileDescription.corners.map((cornerIndex) => corners[cornerIndex]));
     });
   }
 
-  private addAdjacentTilesAndCornersToCorners(
-    corners: Corner[],
-    tiles: Tile[]
-  ): void {
+  private addAdjacentTilesAndCornersToCorners(corners: Corner[], tiles: Tile[]): void {
     corners.forEach((corner, cornerIndex) => {
       const cornerDescription = this.cornerDescriptions[cornerIndex];
-      corner.addAdjacentTiles(
-        ...cornerDescription.adjacentTiles.map((tileIndex) => tiles[tileIndex])
-      );
+      corner.addAdjacentTiles(...cornerDescription.adjacentTiles.map((tileIndex) => tiles[tileIndex]));
       corner.addAdjacentCorners(
-        ...cornerDescription.adjacentCorners.map(
-          (otherCornerIndex) => corners[otherCornerIndex]
-        )
+        ...cornerDescription.adjacentCorners.map((otherCornerIndex) => corners[otherCornerIndex])
       );
     });
   }
@@ -137,20 +118,13 @@ export class BoardBuilder {
         const corner: ProvisionalCornerDescription = {
           index: lastCornerIndex + i,
           layer: n,
-          adjacentCorners: [
-            lastCornerIndex + mod(i - 1, size),
-            lastCornerIndex + mod(i + 1, size),
-          ],
+          adjacentCorners: [lastCornerIndex + mod(i - 1, size), lastCornerIndex + mod(i + 1, size)],
         };
         if (isExternalForLayer(i, n)) {
           externalCorners.push(corner);
         } else {
-          previousLayerExternalCorners[
-            internalCornerIndex
-          ].adjacentCorners.push(lastCornerIndex + i);
-          corner.adjacentCorners.unshift(
-            previousLayerExternalCorners[internalCornerIndex].index
-          );
+          previousLayerExternalCorners[internalCornerIndex].adjacentCorners.push(lastCornerIndex + i);
+          corner.adjacentCorners.unshift(previousLayerExternalCorners[internalCornerIndex].index);
           internalCornerIndex++;
         }
         corners.push(corner);
@@ -162,19 +136,12 @@ export class BoardBuilder {
     return ([] as ProvisionalCornerDescription[]).concat(...layers);
   }
 
-  private buildTileDescriptions(
-    cornerDescriptions: ProvisionalCornerDescription[]
-  ): TileDescription[] {
-    const cornersByLayer = Array.from(
-      { length: this.layerCount },
-      (_, layerIndex) =>
-        cornerDescriptions
-          .filter(({ layer }) => layer === layerIndex)
-          .map(({ index }) => index)
+  private buildTileDescriptions(cornerDescriptions: ProvisionalCornerDescription[]): TileDescription[] {
+    const cornersByLayer = Array.from({ length: this.layerCount }, (_, layerIndex) =>
+      cornerDescriptions.filter(({ layer }) => layer === layerIndex).map(({ index }) => index)
     );
 
-    const layerSize = (layerIndex: number) =>
-      layerIndex > 0 ? 6 * layerIndex : 1;
+    const layerSize = (layerIndex: number) => (layerIndex > 0 ? 6 * layerIndex : 1);
 
     const layers: TileDescription[][] = [];
     let lastTileIndex = 0;
@@ -195,16 +162,8 @@ export class BoardBuilder {
         } else {
           const isCornerTile = i % n === n - 1;
           tile.corners.push(
-            ...sliceRound(
-              cornersByLayer[n - 1],
-              previousLayerCurrentCornerIndex,
-              isCornerTile ? 2 : 3
-            ),
-            ...sliceRound(
-              cornersByLayer[n],
-              thisLayerCurrentCornerIndex,
-              isCornerTile ? 4 : 3
-            )
+            ...sliceRound(cornersByLayer[n - 1], previousLayerCurrentCornerIndex, isCornerTile ? 2 : 3),
+            ...sliceRound(cornersByLayer[n], thisLayerCurrentCornerIndex, isCornerTile ? 4 : 3)
           );
           previousLayerCurrentCornerIndex += isCornerTile ? 1 : 2;
           thisLayerCurrentCornerIndex += isCornerTile ? 3 : 2;
@@ -221,14 +180,9 @@ export class BoardBuilder {
     cornerDescriptions: ProvisionalCornerDescription[],
     tileDescriptions: TileDescription[]
   ): CornerDescription[] {
-    const adjacentTilesForCorners: number[][] = Array.from(
-      { length: cornerDescriptions.length },
-      () => []
-    );
+    const adjacentTilesForCorners: number[][] = Array.from({ length: cornerDescriptions.length }, () => []);
     tileDescriptions.forEach(({ corners }, tileIndex) => {
-      corners.forEach((cornerIndex) =>
-        adjacentTilesForCorners[cornerIndex].push(tileIndex)
-      );
+      corners.forEach((cornerIndex) => adjacentTilesForCorners[cornerIndex].push(tileIndex));
     });
     return cornerDescriptions.map((description, index) => ({
       ...description,
@@ -240,9 +194,7 @@ export class BoardBuilder {
     if (this.layerCount === 3) {
       return [11, 3, 6, 5, 4, 9, 10, 8, 4, 11, 12, 9, 10, 8, 3, 6, 2, 5];
     } else {
-      throw Error(
-        `Cannot compute tile numbers for a board of size ${this.layerCount}`
-      );
+      throw Error(`Cannot compute tile numbers for a board of size ${this.layerCount}`);
     }
   }
 
@@ -270,18 +222,13 @@ export class BoardBuilder {
         null,
       ]);
     } else {
-      throw Error(
-        `Cannot compute resources for a board of size ${this.layerCount}`
-      );
+      throw Error(`Cannot compute resources for a board of size ${this.layerCount}`);
     }
   }
 
   private getPorts(): (Port | null)[] {
     if (this.layerCount === 3) {
-      const ports: (Port | null)[] = Array.from(
-        { length: this.cornerDescriptions.length },
-        () => null
-      );
+      const ports: (Port | null)[] = Array.from({ length: this.cornerDescriptions.length }, () => null);
       ports[24] = new ResourcePort(2, Resource.Wool);
       ports[25] = new ResourcePort(2, Resource.Wool);
       ports[28] = new OpenPort(3);
@@ -302,9 +249,7 @@ export class BoardBuilder {
       ports[52] = new OpenPort(3);
       return ports;
     } else {
-      throw Error(
-        `Cannot compute ports for a board of size ${this.layerCount}`
-      );
+      throw Error(`Cannot compute ports for a board of size ${this.layerCount}`);
     }
   }
 }

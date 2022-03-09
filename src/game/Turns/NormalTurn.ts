@@ -32,7 +32,7 @@ export class NormalTurn extends Turn {
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       {
-        check: () => this.rollDice === null,
+        check: () => this.diceRoll === null,
         elseReason: CheckFailedReason.DiceAlreadyRolled,
       },
     ]);
@@ -134,7 +134,7 @@ export class NormalTurn extends Turn {
   }
 
   public canCollect(player: Player, resources?: ResourceBundle): CheckResult {
-    const checks = [this.turnNotFinished(), this.isCurrentPlayer(player)];
+    const checks = [this.turnNotFinished(), this.diceRolled()];
     if (resources !== undefined) {
       checks.push({
         check: () => this.collectibleResources(player).hasAll(resources),
@@ -151,7 +151,14 @@ export class NormalTurn extends Turn {
   }
 
   public canDiscard(player: Player, resources?: ResourceBundle): CheckResult {
-    const checks = [this.turnNotFinished()];
+    const checks = [
+      this.turnNotFinished(),
+      this.diceRolled(),
+      {
+        check: () => this.resourcesToDiscard[player.getId()] > 0,
+        elseReason: CheckFailedReason.ResourcesNotDiscardable,
+      },
+    ];
     if (resources !== undefined) {
       checks.push(() => player.canGiveAway(resources));
       checks.push({
@@ -266,7 +273,7 @@ export class NormalTurn extends Turn {
   // Checks
   protected diceRolled(): Check {
     return {
-      check: () => this.diceRoll === null,
+      check: () => this.diceRoll !== null,
       elseReason: CheckFailedReason.DiceNotRolled,
     };
   }

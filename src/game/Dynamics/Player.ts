@@ -232,6 +232,7 @@ export class Player {
     const card = this.game.drawDevelopmentCard();
     this.developmentCards.push(card);
     card.giveTo(this, turn);
+    this.giveAway(DevelopmentCard.cost());
     return card;
   }
 
