@@ -59,7 +59,12 @@ export class NormalTurn extends Turn {
   }
 
   public canBuildRoad(player: Player, corners?: [Corner, Corner]): CheckResult {
-    return this.check([() => player.canBuildRoad(corners, false)]);
+    return this.check([
+      this.turnNotFinished(),
+      this.isCurrentPlayer(player),
+      ...this.afterThiefSequence(),
+      () => player.canBuildRoad(corners, false),
+    ]);
   }
 
   @check((turn: NormalTurn, player: Player, [corner1, corner2]: [Corner, Corner]) =>
