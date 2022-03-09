@@ -7,6 +7,7 @@ export const serializePlayerPlublic = (player: Player) => {
     id: player.getId(),
     name: player.getName(),
     playedDevelopmentCards: player.getPlayedDevelopmentCards().map((card) => serializeDevelopmentCard(card)),
+    developmentCardCount: player.getDevelopmentCards().length,
     achievementTokens: player.getAchievementTokens().map((token) => serializeAchievementToken(token)),
     resourcesCount: player.getResourcesCount(),
     visibleVictoryPoints: player.getVisibleVictoryPoints(),

@@ -139,7 +139,7 @@ export class NormalTurn extends Turn {
   }
 
   public canCollect(player: Player, resources?: ResourceBundle): CheckResult {
-    const checks = [this.turnNotFinished(), this.diceRolled()];
+    const checks = [this.turnNotFinished(), ...this.afterThiefSequence()];
     if (resources !== undefined) {
       checks.push({
         check: () => this.collectibleResources(player).hasAll(resources),
@@ -231,6 +231,7 @@ export class NormalTurn extends Turn {
       this.turnNotFinished(),
       this.isCurrentPlayer(player),
       { check: () => this.diceRoll === 7, elseReason: CheckFailedReason.DiceRollIsNot7 },
+      this.allResourcesDiscarded(),
       { check: () => this.thiefMovedTo === null, elseReason: CheckFailedReason.ThiefAlreadyMoved },
     ];
     if (tile !== undefined && stealFrom !== undefined) {
