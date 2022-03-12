@@ -1,6 +1,5 @@
-import GameInterface from "./interface/GameInterface";
-
 export * from "./game";
-export { GameInterface };
+export * from "./interface";
 
+import { GameInterface } from "./interface";
 export default GameInterface;

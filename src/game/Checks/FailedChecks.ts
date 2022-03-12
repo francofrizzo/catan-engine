@@ -45,4 +45,8 @@ export enum CheckFailedReason {
   DevelopmentCardAlreadyPlayedInTurn = "DEVELOPMENT_CARD_ALREADY_PLAYED_IN_TURN",
 }
 
-export class CheckFailedError extends Error {}
+export class CheckFailedError extends Error {
+  constructor(public reason: CheckFailedReason) {
+    super(`Gameplay error: ${reason}`);
+  }
+}

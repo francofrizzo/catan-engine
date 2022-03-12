@@ -14,4 +14,8 @@ export enum GameplayErrorReason {
   NotEnoughResources = "NOT_ENOUGH_RESOURCES",
 }
 
-export class GameplayError extends Error {}
+export class GameplayError extends Error {
+  constructor(public reason: GameplayErrorReason) {
+    super(`Gameplay error: ${reason}`);
+  }
+}

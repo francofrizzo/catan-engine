@@ -30,6 +30,9 @@ import Turn from "./Turns/Turn";
 import VictoryPointCard from "./DevelopmentCards/VictoryPointCard";
 import YearOfPlentyCard from "./DevelopmentCards/YearOfPlentyCard";
 
+export const isCatanError = (err: unknown): err is CheckFailedError | GameplayError =>
+  typeof err === "object" && (err instanceof CheckFailedError || err instanceof GameplayError);
+
 export {
   AchievementToken,
   AchievementTokenType,

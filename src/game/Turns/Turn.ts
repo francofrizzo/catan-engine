@@ -29,6 +29,7 @@ export abstract class Turn {
   public abstract canRollDice(player: Player): CheckResult;
   public abstract rollDice(player: Player): number;
   public abstract getDiceRoll(): number | null;
+  public abstract getEachDiceRoll(): [number, number] | null;
 
   // Constructions
   public abstract canBuildRoad(player: Player): CheckResult;

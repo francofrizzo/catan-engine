@@ -9,7 +9,7 @@ import Turn from "../../game/Turns/Turn";
 
 export type ResourceCollection = { [K in Resource]?: number };
 
-export type ActionRegistry = {
+type ActionRegistry = {
   RollDice: {
     arguments: [];
     jsonArguments: {};
@@ -61,8 +61,10 @@ export type ActionRegistry = {
 };
 
 export type Action = keyof ActionRegistry;
+export type ActionArguments<A extends Action> = ActionRegistry[A]["arguments"];
+export type ActionJsonArguments<A extends Action> = ActionRegistry[A]["jsonArguments"];
 
-export const actionChecks = (turn: Turn): { [T in Action]: (this: Turn, player: Player) => CheckResult } => ({
+export const actionChecks = (turn: Turn): { [A in Action]: (this: Turn, player: Player) => CheckResult } => ({
   RollDice: turn.canRollDice,
   BuildRoad: turn.canBuildRoad,
   BuildSettlement: turn.canBuildSettlement,
@@ -79,7 +81,7 @@ export const actionChecks = (turn: Turn): { [T in Action]: (this: Turn, player: 
 
 export const actionMethods = (
   turn: Turn
-): { [T in Action]: (this: Turn, player: Player, ...args: ActionRegistry[T]["arguments"]) => any } => ({
+): { [A in Action]: (this: Turn, player: Player, ...args: ActionArguments<A>) => any } => ({
   RollDice: turn.rollDice,
   BuildRoad: turn.buildRoad,
   BuildSettlement: turn.buildSettlement,

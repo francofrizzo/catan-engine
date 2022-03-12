@@ -33,6 +33,10 @@ export class InitialPhaseTurn extends Turn {
     return null;
   }
 
+  public getEachDiceRoll(): null {
+    return null;
+  }
+
   public canBuildRoad(player: Player, corners?: [Corner, Corner]): CheckResult {
     const checks = [
       this.turnNotFinished(),

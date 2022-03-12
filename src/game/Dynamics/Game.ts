@@ -18,9 +18,12 @@ export interface GameOptions {
   autoCollect: boolean;
 }
 
+const mod = (n: number, m: number) => ((n % m) + m) % m;
+
 export class Game {
   protected board: Board;
   protected players: Player[];
+  protected firstPlayerId: number;
   protected allDevelopmentCards: DevelopmentCard[];
   protected developmentCardDeck: DevelopmentCard[];
   protected achievementTokens: AchievementToken[] = [new LongestRouteToken(), new LargestArmyToken()];
@@ -31,6 +34,7 @@ export class Game {
   constructor(protected options: GameOptions) {
     this.board = new Board();
     this.players = this.options.playerNames.map((name, index) => new Player(this, index, name));
+    this.firstPlayerId = Math.floor(Math.random() * this.players.length);
     this.allDevelopmentCards = getDevelopmentCardDeck(this);
     this.developmentCardDeck = this.allDevelopmentCards;
     this.currentTurn = this.buildFirstTurn();
@@ -107,19 +111,19 @@ export class Game {
   }
 
   protected getNextPlayer(id: number): Player {
-    return id < this.players.length - 1 ? this.players[id + 1] : this.players[0];
+    return this.players[mod(id + 1, this.players.length)];
   }
 
   protected getPreviousPlayer(id: number): Player {
-    return id > 0 ? this.players[id - 1] : this.players[this.players.length - 1];
+    return this.players[mod(id - 1, this.players.length)];
   }
 
   protected getFirstPlayer(): Player {
-    return this.players[0];
+    return this.players[this.firstPlayerId];
   }
 
   protected getSecondPlayer(): Player {
-    return this.players[1];
+    return this.players[mod(this.firstPlayerId + 1, this.players.length)];
   }
 
   protected isFirstPlayer(id: number): boolean {

@@ -14,7 +14,7 @@ import Tile from "../Board/Tile";
 import { GameplayError, GameplayErrorReason } from "../GameplayError/GameplayError";
 
 export class NormalTurn extends Turn {
-  protected diceRoll: number | null = null;
+  protected eachDiceRoll: [number, number] | null = null;
   protected collectedResources: Record<number, ResourceBundle> = {};
   protected resourcesToDiscard: Record<number, number> = {};
   protected thiefMovedTo: Tile | null = null;
@@ -25,6 +25,14 @@ export class NormalTurn extends Turn {
     this.game.getPlayers().forEach((player) => {
       this.collectedResources[player.getId()] = new ResourceBundle();
     });
+  }
+
+  protected get diceRoll(): number | null {
+    if (this.eachDiceRoll !== null) {
+      return this.eachDiceRoll[0] + this.eachDiceRoll[1];
+    } else {
+      return null;
+    }
   }
 
   public canRollDice(player: Player): CheckResult {
@@ -41,21 +49,26 @@ export class NormalTurn extends Turn {
   @check((turn: NormalTurn, player: Player) => turn.canRollDice(player))
   public rollDice(player: Player): number {
     const dice = () => Math.floor(Math.random() * 6) + 1;
-    this.diceRoll = dice() + dice();
+    this.eachDiceRoll = [dice(), dice()];
+    const diceRoll = this.eachDiceRoll[0] + this.eachDiceRoll[1];
     if (this.game.getOptions().autoCollect) {
       this.autoCollect();
     }
-    if (this.diceRoll === 7) {
+    if (diceRoll === 7) {
       this.game.getPlayers().forEach((player) => {
         const resourcesCount = player.getResourcesCount();
         this.resourcesToDiscard[player.getId()] = resourcesCount <= 7 ? 0 : Math.floor(resourcesCount / 2);
       });
     }
-    return this.diceRoll;
+    return diceRoll;
   }
 
   public getDiceRoll(): number | null {
     return this.diceRoll;
+  }
+
+  public getEachDiceRoll(): [number, number] | null {
+    return this.eachDiceRoll;
   }
 
   public canBuildRoad(player: Player, corners?: [Corner, Corner]): CheckResult {

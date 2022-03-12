@@ -1,33 +1,36 @@
+import { isCatanError } from "../game";
 import { CheckFailedError } from "../game/Checks/FailedChecks";
 import Game, { GameOptions } from "../game/Dynamics/Game";
 import Player from "../game/Dynamics/Player";
 import { GameplayError } from "../game/GameplayError/GameplayError";
-import { Action, actionChecks, actionMethods, ActionRegistry } from "./Actions/Actions";
+import { Action, actionChecks, actionMethods, ActionArguments, ActionJsonArguments } from "./Actions/Actions";
 import actionArgumentParsers from "./ArgumentParsers/ArgumentParsers";
 import { serializeGame } from "./Serializers/Game";
 import { serializePlayerPrivate } from "./Serializers/PlayerPrivate";
 
-export type ActionCallback = <T extends Action>(
+export type ActionCallback = <A extends Action>(
   gameInterface: GameInterface,
-  action: T,
+  action: A,
   player: Player,
-  args: ActionRegistry[T]["arguments"]
+  args: ActionJsonArguments<A>,
+  parsedArgs: ActionArguments<A>
 ) => unknown;
 
-export type ArgumentParseErrorCallback = <T extends Action>(
+export type ArgumentParseErrorCallback = <A extends Action>(
   error: any,
   gameInterface: GameInterface,
-  action: T,
+  action: A,
   player: Player,
-  args: ActionRegistry[T]["jsonArguments"]
+  args: ActionJsonArguments<A>
 ) => unknown;
 
-export type ActionErrorCallback = <T extends Action>(
+export type ActionErrorCallback = <A extends Action>(
   error: CheckFailedError | GameplayError,
   gameInterface: GameInterface,
-  action: T,
+  action: A,
   player: Player,
-  args: ActionRegistry[T]["arguments"]
+  args: ActionJsonArguments<A>,
+  parsedArgs: ActionArguments<A>
 ) => unknown;
 
 export class GameInterface {
@@ -76,7 +79,7 @@ export class GameInterface {
       .map(([action]) => action as Action);
   }
 
-  public executeAction<T extends Action>(playerId: number, action: T, args: ActionRegistry[T]["jsonArguments"]): void {
+  public executeAction<A extends Action>(playerId: number, action: A, args: ActionJsonArguments<A>): void {
     const turn = this.game.getCurrentTurn();
     const player = this.game.getPlayer(playerId);
 
@@ -87,14 +90,14 @@ export class GameInterface {
 
     const method = actionMethods(turn)[action];
     try {
-      this.callbacks.beforeAction.forEach((callback) => callback(this, action, player, parsedArgs));
+      this.callbacks.beforeAction.forEach((callback) => callback(this, action, player, args, parsedArgs));
       (method as any).apply(turn, [player, ...parsedArgs]);
-      this.callbacks.afterAction.forEach((callback) => callback(this, action, player, parsedArgs));
+      this.callbacks.afterAction.forEach((callback) => callback(this, action, player, args, parsedArgs));
     } catch (err: any) {
-      if (err instanceof CheckFailedError || err instanceof GameplayError) {
-        this.callbacks.onActionError.forEach((callback) => callback(err, this, action, player, parsedArgs));
+      if (isCatanError(err)) {
+        this.callbacks.onActionError.forEach((callback) => callback(err, this, action, player, args, parsedArgs));
       }
-      throw Error("Error executing action: " + err);
+      throw err;
     }
   }
 
@@ -104,7 +107,7 @@ export class GameInterface {
       return argumentParser(args);
     } catch (err: any) {
       this.callbacks.onArgumentParseError.forEach((callback) => callback(err, this, action, player, args));
-      throw Error("Error parsing arguments" + err);
+      throw err;
     }
   }
 }

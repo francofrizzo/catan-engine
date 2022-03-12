@@ -1,10 +1,10 @@
 import Game from "../../game/Dynamics/Game";
 import ResourceBundle from "../../game/Resources/ResourceBundle";
-import { Action, ActionRegistry } from "../Actions/Actions";
+import { Action, ActionArguments, ActionJsonArguments } from "../Actions/Actions";
 
 export const actionArgumentParsers = (
   game: Game
-): { [T in Action]: (jsonArgs: ActionRegistry[T]["jsonArguments"]) => ActionRegistry[T]["arguments"] } => ({
+): { [A in Action]: (jsonArgs: ActionJsonArguments<A>) => ActionArguments<A> } => ({
   RollDice: () => [],
   BuildRoad: ({ corners }) => [[game.getBoard().getCorner(corners[0]), game.getBoard().getCorner(corners[1])]],
   BuildSettlement: ({ corner }) => [game.getBoard().getCorner(corner)],
