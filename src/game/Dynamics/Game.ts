@@ -127,11 +127,11 @@ export class Game {
   }
 
   protected isFirstPlayer(id: number): boolean {
-    return id === 0;
+    return id === this.firstPlayerId;
   }
 
   protected isSecondPlayer(id: number): boolean {
-    return id === 1;
+    return id === mod(this.firstPlayerId + 1, this.players.length);
   }
 
   // Tokens and cards
