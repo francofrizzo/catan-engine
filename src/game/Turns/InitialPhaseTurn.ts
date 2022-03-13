@@ -112,6 +112,14 @@ export class InitialPhaseTurn extends Turn {
     throw new CheckFailedError(CheckFailedReason.NotAllowedInThisTurn);
   }
 
+  public getResourcesToDiscard(): Record<number, number> {
+    const resourcesToDiscard: Record<number, number> = {};
+    this.game.getPlayers().forEach((player) => {
+      resourcesToDiscard[player.getId()] = 0;
+    });
+    return resourcesToDiscard;
+  }
+
   public canDiscard(): CheckResult {
     return this.notAllowedInThisTurn();
   }

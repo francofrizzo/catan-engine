@@ -8,5 +8,6 @@ export const serializePlayerPrivate = (player: Player) => {
     allDevelopmentCards: player.getDevelopmentCards().map((card) => serializeDevelopmentCard(card)),
     resources: serializeResources(player.getResources()),
     totalVictoryPoints: player.getVictoryPoints(),
+    exchangeRates: player.getExchangeRates(),
   };
 };

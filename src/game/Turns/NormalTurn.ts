@@ -51,14 +51,18 @@ export class NormalTurn extends Turn {
     const dice = () => Math.floor(Math.random() * 6) + 1;
     this.eachDiceRoll = [dice(), dice()];
     const diceRoll = this.eachDiceRoll[0] + this.eachDiceRoll[1];
-    if (this.game.getOptions().autoCollect) {
-      this.autoCollect();
-    }
     if (diceRoll === 7) {
       this.game.getPlayers().forEach((player) => {
         const resourcesCount = player.getResourcesCount();
         this.resourcesToDiscard[player.getId()] = resourcesCount <= 7 ? 0 : Math.floor(resourcesCount / 2);
       });
+    } else {
+      this.game.getPlayers().forEach((player) => {
+        this.resourcesToDiscard[player.getId()] = 0;
+      });
+      if (this.game.getOptions().autoCollect) {
+        this.autoCollect();
+      }
     }
     return diceRoll;
   }
@@ -166,6 +170,10 @@ export class NormalTurn extends Turn {
   public collect(player: Player, resources: ResourceBundle): void {
     player.recieve(resources);
     this.collectedResources[player.getId()].addAll(resources);
+  }
+
+  public getResourcesToDiscard(): Record<number, number> {
+    return this.resourcesToDiscard;
   }
 
   public canDiscard(player: Player, resources?: ResourceBundle): CheckResult {

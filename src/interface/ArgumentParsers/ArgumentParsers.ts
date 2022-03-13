@@ -18,7 +18,7 @@ export const actionArgumentParsers = (
     new ResourceBundle(resourcesGiven),
     new ResourceBundle(resourcesTaken),
   ],
-  Trade: ({ resourceGiven, resourceTaken }) => [resourceGiven, resourceTaken],
+  Trade: ({ resourceTaken, resourceGiven }) => [resourceTaken, resourceGiven],
   MoveThief: ({ tile, stealFrom }) => [
     game.getBoard().getTile(tile),
     stealFrom !== null ? game.getPlayer(stealFrom) : null,

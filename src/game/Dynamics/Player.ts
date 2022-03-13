@@ -122,7 +122,7 @@ export class Player {
   public canTrade(resourceTaken: Resource, resourceGiven: Resource): CheckResult {
     return new Checker()
       .addCheck({
-        check: () => this.resources.has(resourceGiven, this.exchangeRate(resourceGiven)),
+        check: () => this.resources.has(resourceGiven, this.getExchangeRate(resourceGiven)),
         elseReason: CheckFailedReason.NotEnoughResources,
       })
       .run();
@@ -131,17 +131,27 @@ export class Player {
   public trade(resourceTaken: Resource, resourceGiven: Resource): void {
     this.giveAway(
       new ResourceBundle({
-        [resourceGiven]: this.exchangeRate(resourceGiven),
+        [resourceGiven]: this.getExchangeRate(resourceGiven),
       })
     );
     this.recieve(new ResourceBundle({ [resourceTaken]: 1 }));
   }
 
-  public exchangeRate(resource: Resource): number {
+  public getExchangeRate(resource: Resource): number {
     return Math.min(
       4,
       ...this.controlledPorts.filter((port) => port.accepts(resource)).map((port) => port.getExchangeRate())
     );
+  }
+
+  public getExchangeRates(): Record<Resource, number> {
+    return {
+      [Resource.Brick]: this.getExchangeRate(Resource.Brick),
+      [Resource.Grain]: this.getExchangeRate(Resource.Grain),
+      [Resource.Lumber]: this.getExchangeRate(Resource.Lumber),
+      [Resource.Ore]: this.getExchangeRate(Resource.Ore),
+      [Resource.Wool]: this.getExchangeRate(Resource.Wool),
+    };
   }
 
   // Constructions

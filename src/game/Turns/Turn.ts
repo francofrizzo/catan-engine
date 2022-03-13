@@ -57,6 +57,7 @@ export abstract class Turn {
   public abstract canCollect(player: Player, resources: ResourceBundle): CheckResult;
   public abstract collect(player: Player, resources: ResourceBundle): void;
 
+  public abstract getResourcesToDiscard(): Record<number, number>;
   public abstract canDiscard(player: Player): CheckResult;
   public abstract canDiscard(player: Player, resources: ResourceBundle): CheckResult;
   public abstract discard(player: Player, resources: ResourceBundle): void;

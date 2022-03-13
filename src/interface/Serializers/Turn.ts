@@ -5,5 +5,6 @@ export const serializeTurn = (turn: Turn) => {
     player: turn.getPlayer().getId(),
     diceRoll: turn.getDiceRoll(),
     eachDiceRoll: turn.getEachDiceRoll(),
+    resourcesToDiscard: turn.getResourcesToDiscard(),
   };
 };
