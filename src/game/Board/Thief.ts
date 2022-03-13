@@ -27,7 +27,7 @@ export class Thief {
     const stealablePlayers = tile
       .getAdjacentConstructions()
       .map((construction) => construction.getPlayer())
-      .filter((player) => !player.is(player) && player.getResourcesCount() > 0);
+      .filter((otherPlayer) => !otherPlayer.is(player) && otherPlayer.getResourcesCount() > 0);
     return new Checker()
       .addChecks([
         {

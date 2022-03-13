@@ -80,7 +80,9 @@ export class Player {
     this.resources.forEach((resource, quantity) => {
       availableResources.push(...Array.from({ length: quantity }, () => resource));
     });
-    return new ResourceBundle({ [shuffle(availableResources)[0]]: 1 });
+    const resourceToGiveAway = shuffle(availableResources)[0];
+    this.resources.subtract(resourceToGiveAway, 1);
+    return new ResourceBundle({ [resourceToGiveAway]: 1 });
   }
 
   public canExchange(otherPlayer: Player, resourcesGiven: ResourceBundle, resourcesTaken: ResourceBundle): CheckResult {
